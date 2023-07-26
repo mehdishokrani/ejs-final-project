@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h2>Login</h2>
+    <% if (typeof error !== 'undefined') { %>
+      <div class="alert alert-danger" role="alert">
+        <%= error %>
+      </div>
+    <% } %>
+    <form action="/login" method="POST">
+      <div class="form-group">
+        <label for="email">Email/Username:</label>
+        <input type="email" class="form-control" id="email" placeholder="Enter email or Username" name="email" required>
+      </div>
+      <div class="form-group">
+        <label for="pwd">Password:</label>
+        <input type="password" class="form-control" id="pwd" placeholder="Enter password" name="password" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+    <p>Don't have an account? <a href="/signup">Sign Up</a></p>
+  </div>
+
+  <% if (typeof timeout !== 'undefined') { %>
+  <script>
+  $(document).ready(function(){
+    $('button[type="submit"]').prop('disabled', true);
+    setTimeout(function(){
+      $('button[type="submit"]').prop('disabled', false);
+    }, <%= timeout %> * 1000);
+  });
+  </script>
+  <% } %>
+</body>
+</html>
