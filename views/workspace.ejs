@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Workspace Details</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Workspace Details</h1>
+
+    <div class="card">
+      <div class="card-body">
+        <p>Type: <%= workspace.type %></p>
+        <p>Seats: <%= workspace.seats %></p>
+        <p>Smoking: <%= workspace.smoking ? 'Yes' : 'No' %></p>
+        <p>Availability: <%= workspace.availability %></p>
+        <p>Lease: <%= workspace.lease %></p>
+        <p>Price: <%= workspace.price %></p>
+
+        <a href="/properties/<%= propertyId %>/workspaces/<%= workspaceId %>/edit" class="btn btn-primary">Edit</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Edit Property</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Edit Property</h1>
+    <form action="/properties/<%= propertyId %>/edit" method="POST">
+      <div class="form-group">
+        <label for="address">Address:</label>
+        <input type="text" class="form-control" id="address" name="address" value="<%= property.address %>">
+      </div>
+      <div class="form-group">
+        <label for="neighborhood">Neighborhood:</label>
+        <input type="text" class="form-control" id="neighborhood" name="neighborhood" value="<%= property.neighborhood %>">
+      </div>
+      <div class="form-group">
+        <label for="squareFeet">Square Feet:</label>
+        <input type="text" class="form-control" id="squareFeet" name="squareFeet" value="<%= property.squareFeet %>">
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="hasParkingGarage" name="hasParkingGarage" <%= property.hasParkingGarage ? 'checked' : '' %>>
+        <label class="form-check-label" for="hasParkingGarage">Parking Garage:</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="isReachableByPublicTransportation" name="isReachableByPublicTransportation" <%= property.isReachableByPublicTransportation ? 'checked' : '' %>>
+        <label class="form-check-label" for="isReachableByPublicTransportation">Public Transportation:</label>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  </div>
+</body>
+</html>

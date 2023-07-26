@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Edit Workspace</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Edit Workspace</h1>
+
+    <form action="/properties/<%= propertyId %>/workspaces/<%= workspaceId %>/edit" method="POST">
+      <div class="form-group">
+        <label for="type">Type:</label>
+        <input type="text" class="form-control" id="type" name="type" value="<%= workspace.type %>" required>
+      </div>
+
+      <div class="form-group">
+        <label for="seats">Seats:</label>
+        <input type="text" class="form-control" id="seats" name="seats" value="<%= workspace.seats %>" required>
+      </div>
+
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="smoking" name="smoking" <%= workspace.smoking ? 'checked' : '' %>>
+        <label class="form-check-label" for="smoking">Smoking</label>
+      </div>
+
+      <div class="form-group">
+        <label for="availability">Availability:</label>
+        <input type="text" class="form-control" id="availability" name="availability" value="<%= workspace.availability %>" required>
+      </div>
+
+      <div class="form-group">
+        <label for="lease">Lease:</label>
+        <input type="text" class="form-control" id="lease" name="lease" value="<%= workspace.lease %>" required>
+      </div>
+
+      <div class="form-group">
+        <label for="price">Price:</label>
+        <input type="text" class="form-control" id="price" name="price" value="<%= workspace.price %>" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Update Workspace</button>
+    </form>
+  </div>
+</body>
+</html>

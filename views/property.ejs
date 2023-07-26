@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Property</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container">
+    <h1><%= property.address %></h1>
+    <p>Neighborhood: <%= property.neighborhood %></p>
+    <p>Square feet: <%= property.sqft %></p>
+    <p>Parking garage: <%= property.parking ? 'Yes' : 'No' %></p>
+    <p>Accessible by public transportation: <%= property.publicTrans ? 'Yes' : 'No' %></p>
+    <h2>Workspaces</h2>
+    <ul>
+    <% for (const id in property.workspaces) { %>
+      <li><%= property.workspaces[id].type %> - <%= property.workspaces[id].seats %> seats - $<%= property.workspaces[id].price %></li>
+    <% } %>
+    </ul>
+    <a href="/properties/<%= propertyId %>/workspaces/new">Add workspace</a>
+  </div>
+</body>
+</html>

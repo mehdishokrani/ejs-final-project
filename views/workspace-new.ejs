@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>New Workspace</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container">
+    <h1>New Workspace</h1>
+    <form action="/properties/<%= propertyId %>/workspaces/new" method="POST">
+      <div class="form-group">
+        <label for="type">Type</label>
+        <input type="text" id="type" name="type" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label for="seats">Seats</label>
+        <input type="number" id="seats" name="seats" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label for="smoking">Smoking Allowed</label>
+        <select id="smoking" name="smoking" class="form-control" required>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="availability">Availability Date</label>
+        <input type="date" id="availability" name="availability" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label for="lease">Lease Term</label>
+        <select id="lease" name="lease" class="form-control" required>
+          <option value="day">Day</option>
+          <option value="week">Week</option>
+          <option value="month">Month</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="price">Price</label>
+        <input type="number" id="price" name="price" class="form-control" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Create Workspace</button>
+    </form>
+  </div>
+</body>
+</html>
