@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Properties</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4">My Properties</h1>
+        <table class="table">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">Address</th>
+                    <th scope="col">Neighborhood</th>
+                    <th scope="col">Sqft</th>
+                    <th scope="col">Parking</th>
+                    <th scope="col">Public Transportation</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% for(let id in properties) { %>
+                    <tr>
+                        <td><%= properties[id].address %></td>
+                        <td><%= properties[id].neighborhood %></td>
+                        <td><%= properties[id].sqft %></td>
+                        <td><%= properties[id].parking ? 'Yes' : 'No' %></td>
+                        <td><%= properties[id].publicTrans ? 'Yes' : 'No' %></td>
+                        <td>
+                            <a href="/properties/<%= id %>/edit" class="btn btn-primary">Edit</a>
+                            <form action="/properties/<%= id %>/delete" method="POST" style="display: inline;">
+                                <input type="submit" value="Delete" class="btn btn-danger">
+                            </form>
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+        <a href="/properties/new" class="btn btn-success">Add Property</a>
+    </div>
+</body>
+</html>

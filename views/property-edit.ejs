@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Property</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center my-4">Edit Property</h1>
+        <form action="/properties/<%= propertyId %>/edit" method="POST">
+
+
+            <div class="form-group">
+                <label for="address">Address:</label>
+                <input type="text" id="address" name="address" class="form-control" value="<%= property.address %>">
+            </div>
+
+            <div class="form-group">
+                <label for="neighborhood">Neighborhood:</label>
+                <input type="text" id="neighborhood" name="neighborhood" class="form-control" value="<%= property.neighborhood %>">
+            </div>
+
+            <div class="form-group">
+                <label for="sqft">Square Feet:</label>
+                <input type="number" id="sqft" name="sqft" class="form-control" value="<%= property.sqft %>">
+            </div>
+
+            <div class="form-check">
+                <input type="checkbox" id="parking" name="parking" class="form-check-input" value="yes" <% if(property.parking) { %> checked <% } %>>
+                <label class="form-check-label" for="parking">Parking</label>
+            </div>
+
+            <div class="form-check">
+                <input type="checkbox" id="publicTrans" name="publicTrans" class="form-check-input" value="yes" <% if(property.publicTrans) { %> checked <% } %>>
+                <label class="form-check-label" for="publicTrans">Public Transport Access</label>
+            </div>
+
+            <input type="submit" class="btn btn-primary mt-3" value="Save Changes">
+        </form>
+
+        <form action="/properties/<%= propertyId %>/delete" method="POST" class="mt-3">
+            <input type="submit" class="btn btn-danger" value="Delete Property">
+        </form>
+    </div>
+</body>
+</html>

@@ -25,6 +25,7 @@ class User {
     this.email = email;
     this.role = role;
     this.password = password;
+    this.properties = {};
   }
 }
 
@@ -35,29 +36,29 @@ app.get('/signup', (req, res) => {
 app.post('/signup', async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    const user = { 
-      name: req.body.name,
-      phoneNumber: req.body.phoneNumber,
-      email: req.body.email,
-      role: req.body.role,
-      password: hashedPassword 
-    };
+    const user = new User(
+      req.body.name,
+      req.body.phoneNumber,
+      req.body.email,
+      req.body.role,
+      hashedPassword
+    );
 
     // Regex for email validation
     let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
     // Password must be at least 8 characters
-    if(user.password.length < 8) {
+    if(user.password.length < 3) {
       return res.render('signup', { error: 'Password must be at least 8 characters long.' });
     }
 
     // Name must be at least 3 characters and only contain alphabet characters
-    if(user.name.length < 3 || !(/^[A-Za-z]+$/.test(user.name))) {
-      return res.render('signup', { error: 'Name must be at least 3 characters long and only contain alphabet characters.' });
+    if(user.name.length < 3 || !(/^[A-Za-z\s]+$/.test(user.name))) {
+      return res.render('signup', { error: 'Name must be at least 3 characters long and only contain alphabet characters or spaces.' });
     }
 
     // Phone number must be at least 8 digits
-    if(user.phoneNumber.length < 8 || isNaN(user.phoneNumber)) {
+    if(user.phone.length < 8 || isNaN(user.phone)) {
       return res.render('signup', { error: 'Phone number must be at least 8 digits.' });
     }
 
@@ -91,7 +92,11 @@ app.post('/login', async (req, res) => {
   try {
     if(await bcrypt.compare(req.body.password, user.password)) {
       req.session.user = user;
-      res.redirect('/');
+      if(user.role === 'Owner') {
+        res.redirect('/properties');
+      } else {
+        res.redirect('/');
+      }
     } else {
       loginAttempts[email] = (loginAttempts[email] || 0) + 1;
 
@@ -111,8 +116,6 @@ app.post('/login', async (req, res) => {
   }
 });
 
-let properties = {};
-
 function checkOwner(req, res, next) {
   if (!req.session.user || req.session.user.role !== 'Owner') {
     return res.status(403).send('Unauthorized');
@@ -120,13 +123,17 @@ function checkOwner(req, res, next) {
   next();
 }
 
+app.get('/properties', checkOwner, (req, res) => {
+  res.render('properties', { properties: req.session.user.properties });
+});
+
 app.get('/properties/new', checkOwner, (req, res) => {
   res.render('property-new');
 });
 
-app.post('/properties/new', (req, res) => {
+app.post('/properties/new', checkOwner, (req, res) => {
   let id = Date.now().toString();
-  properties[id] = {
+  req.session.user.properties[id] = {
     address: req.body.address,
     neighborhood: req.body.neighborhood,
     sqft: req.body.sqft,
@@ -134,11 +141,11 @@ app.post('/properties/new', (req, res) => {
     publicTrans: req.body.publicTrans === 'yes',
     workspaces: {},
   };
-  res.redirect('/properties/' + id);
+  res.redirect('/properties');
 });
 
-app.get('/properties/:id', (req, res) => {
-  const property = properties[req.params.id];
+app.get('/properties/:id', checkOwner, (req, res) => {
+  const property = req.session.user.properties[req.params.id];
   if (!property) {
     return res.status(404).send('Property not found');
   }
@@ -146,7 +153,7 @@ app.get('/properties/:id', (req, res) => {
 });
 
 app.get('/properties/:propertyId/workspaces/new', (req, res) => {
-  const property = properties[req.params.propertyId];
+  const property = req.session.user.properties[req.params.propertyId];
   if (!property) {
     return res.status(404).send('Property not found');
   }
@@ -154,7 +161,7 @@ app.get('/properties/:propertyId/workspaces/new', (req, res) => {
 });
 
 app.post('/properties/:propertyId/workspaces/new', (req, res) => {
-  const property = properties[req.params.propertyId];
+  const property = req.session.user.properties[req.params.propertyId];
   if (!property) {
     return res.status(404).send('Property not found');
   }
@@ -167,31 +174,34 @@ app.post('/properties/:propertyId/workspaces/new', (req, res) => {
     lease: req.body.lease,
     price: req.body.price,
   };
-  res.redirect('/properties/' + req.params.propertyId + '/workspaces/' + id);
+  res.redirect('/properties/' + req.params.propertyId);
 });
 
 app.get('/properties/:propertyId/workspaces/:workspaceId', (req, res) => {
-  const property = properties[req.params.propertyId];
-  if (!property || !property.workspaces || !property.workspaces[req.params.workspaceId]) {
-    return res.status(404).send('Workspace not found');
-  }
-  const workspace = property.workspaces[req.params.workspaceId];
-  res.render('workspace', { workspace });
-});
-
-app.get('/properties/:propertyId/edit', (req, res) => {
-  const property = properties[req.params.propertyId];
+  const property = req.session.user.properties[req.params.propertyId];
   if (!property) {
     return res.status(404).send('Property not found');
   }
-  res.render('property-edit', { property });
+  const workspace = property.workspaces[req.params.workspaceId];
+  if (!workspace) {
+    return res.status(404).send('Workspace not found');
+  }
+  res.render('workspace', { workspace });
 });
 
-app.post('/properties/:propertyId/edit', (req, res) => {
-  const propertyId = req.params.propertyId;
-  const property = properties[propertyId];
-
+app.get('/properties/:propertyId/edit', checkOwner, (req, res) => {
+  const property = req.session.user.properties[req.params.propertyId];
   if (!property) {
+    return res.status(404).send('Property not found');
+  }
+  res.render('property-edit', { propertyId: req.params.propertyId, property: property });
+});
+
+app.post('/properties/:propertyId/edit', checkOwner, (req, res) => {
+  const propertyId = req.params.propertyId;
+  const properties = req.session.user.properties;
+
+  if (!properties[propertyId]) {
     return res.status(404).send('Property not found');
   }
 
@@ -204,52 +214,17 @@ app.post('/properties/:propertyId/edit', (req, res) => {
     publicTrans: req.body.publicTrans === 'yes',
   };
 
-  res.redirect('/properties/' + propertyId);
-});
-
-app.get('/properties/:propertyId/workspaces/:workspaceId/edit', (req, res) => {
-  const property = properties[req.params.propertyId];
-  if (!property || !property.workspaces || !property.workspaces[req.params.workspaceId]) {
-    return res.status(404).send('Workspace not found');
-  }
-  const workspace = property.workspaces[req.params.workspaceId];
-  res.render('workspace-edit', { workspace });
-});
-
-app.post('/properties/:propertyId/workspaces/:workspaceId/edit', (req, res) => {
-  const propertyId = req.params.propertyId;
-  const workspaceId = req.params.workspaceId;
-  const property = properties[propertyId];
-
-  if (!property || !property.workspaces || !property.workspaces[workspaceId]) {
-    return res.status(404).send('Workspace not found');
-  }
-
-  property.workspaces[workspaceId] = {
-    type: req.body.type,
-    seats: req.body.seats,
-    smoking: req.body.smoking === 'yes',
-    availability: req.body.availability,
-    lease: req.body.lease,
-    price: req.body.price,
-  };
-
-  res.redirect('/properties/' + propertyId + '/workspaces/' + workspaceId);
-});
-
-app.post('/properties/:propertyId/delete', (req, res) => {
-  delete properties[req.params.propertyId];
   res.redirect('/properties');
 });
 
-app.post('/properties/:propertyId/workspaces/:workspaceId/delete', (req, res) => {
-  const property = properties[req.params.propertyId];
-  if (!property || !property.workspaces) {
-    return res.status(404).send('Property not found');
-  }
-
-  delete property.workspaces[req.params.workspaceId];
-  res.redirect('/properties/' + req.params.propertyId);
+app.post('/properties/:propertyId/delete', checkOwner, (req, res) => {
+  delete req.session.user.properties[req.params.propertyId];
+  res.redirect('/properties');
 });
 
-app.listen(3000, () => console.log('Server started on port 3000'));
+
+app.listen(3000, () => {
+  console.log('Server started on port 3000');
+});
+
+
