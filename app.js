@@ -361,21 +361,24 @@ app.get('/owner/workspaces', checkOwner, (req, res) => {
     for (let workspaceId in property.workspaces) {
       let workspace = property.workspaces[workspaceId];
       workspace.propertyId = propertyId; // You might want to know the propertyId for each workspace
+      workspace.workspaceId = workspaceId; // Set workspaceId
+
+      // Construct address string
+      let address = property.address1;
+      if(property.address2) address += ', ' + property.address2;
+      address += ', ' + property.city;
+      address += ', ' + property.state;
+      address += ', ' + property.postalcode;
+
+      workspace.propertyAddress = address; // Set propertyAddress
+
       workspacesList.push(workspace);
     }
   }
-  //res.json(workspacesList);
-  const workspacesview = workspacesList;
-  const workspacesByOwner = {};
-
-  workspacesview.forEach(workspace => {
-    if (!workspacesByOwner[workspace.owner]) {
-        workspacesByOwner[workspace.owner] = [];
-    }
-    workspacesByOwner[workspace.owner].push(workspace);
-  });
-  res.render('workspaces-all-owner',{workspacesByOwner})
+  res.render('workspaces-all-owner', {workspaces: workspacesList});
 });
+
+
 
 
 app.get('/properties/:propertyId/workspaces/:workspaceId/edit', checkOwner, (req, res) => {
