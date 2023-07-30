@@ -1,47 +1,110 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Edit Property</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <title>Edit Property</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .required-label::after {
+      content: "*";
+      color: red;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="text-center my-4">Edit Property</h1>
-        <form action="/properties/<%= propertyId %>/edit" method="POST">
+  <div class="container mt-4">
+    <h1>Edit Property</h1>
+    <form action="/properties/<%= propertyId %>/edit" method="POST" enctype="multipart/form-data">
 
+      <div class="form-group col-6">
+        <label for="address1" class="required-label">Address1:</label>
+        <input type="text" id="address1" name="address1" class="form-control" value="<%= property.address1 %>" required>
+      </div>
 
-            <div class="form-group">
-                <label for="address">Address:</label>
-                <input type="text" id="address" name="address" class="form-control" value="<%= property.address %>">
-            </div>
+      <div class="form-group col-6">
+        <label for="address2">Address2:</label>
+        <input type="text" id="address2" name="address2" class="form-control" value="<%= property.address2 %>">
+      </div>
 
-            <div class="form-group">
-                <label for="neighborhood">Neighborhood:</label>
-                <input type="text" id="neighborhood" name="neighborhood" class="form-control" value="<%= property.neighborhood %>">
-            </div>
+      <div class="form-group col-6">
+        <label for="city" class="required-label">City:</label>
+        <input type="text" id="city" name="city" class="form-control" value="<%= property.city %>" required>
+      </div>
+      <div class="col-6">
+        <label for="state" class="form-label">State</label>
+        <select class="form-select" id="state" name="state" required="">
+          <option value="<%= property.state %>"><%= property.state %></option>
+          <option value="Alberta">Alberta</option>
+          <option value="British Columbia">British Columbia</option>
+          <option value="Manitoba">Manitoba</option>
+          <option value="New Brunswick">New Brunswick</option>
+          <option value="Newfoundland and Labrador">Newfoundland and Labrador</option>
+          <option value="Nova Scotia">Nova Scotia</option>
+          <option value="Ontario">Ontario</option>
+          <option value="Prince Edward Island">Prince Edward Island</option>
+          <option value="Quebec">Quebec</option>
+          <option value="Saskatchewan">Saskatchewan</option>
+          <option value="Northwest Territories">Northwest Territories</option>
+          <option value="Nunavut">Nunavut</option>
+          <option value="Yukon">Yukon</option>
+        </select>
+        <div class="invalid-feedback">
+          Please provide a valid state.
+        </div>
+      </div>
 
-            <div class="form-group">
-                <label for="sqft">Square Feet:</label>
-                <input type="number" id="sqft" name="sqft" class="form-control" value="<%= property.sqft %>">
-            </div>
+      <div class="form-group col-6">
+        <label for="postalcode" class="required-label">Postal Code:</label>
+        <input type="text" id="postalcode" name="postalcode" class="form-control" value="<%= property.postalcode %>" required>
+      </div>
 
-            <div class="form-check">
-                <input type="checkbox" id="parking" name="parking" class="form-check-input" value="yes" <% if(property.parking) { %> checked <% } %>>
-                <label class="form-check-label" for="parking">Parking</label>
-            </div>
+      <div class="form-group col-6">
+        <label for="neighborhood">Neighborhood:</label>
+        <input type="text" id="neighborhood" name="neighborhood" class="form-control" value="<%= property.neighborhood %>">
+      </div>
 
-            <div class="form-check">
-                <input type="checkbox" id="publicTrans" name="publicTrans" class="form-check-input" value="yes" <% if(property.publicTrans) { %> checked <% } %>>
-                <label class="form-check-label" for="publicTrans">Public Transport Access</label>
-            </div>
+      <div class="form-group col-6">
+        <label for="sqft" class="required-label">Square Feet:</label>
+        <input type="text" id="sqft" name="sqft" class="form-control" value="<%= property.sqft %>" required>
+      </div>
+<br>
+<div class="form-inline">
+  <div class="d-inline-block">
+    <div class="form-group">
+      <label>Parking:</label>
+      <div class="btn-group" role="group" aria-label="Basic radio toggle button group" style="margin-right: 30px;">
+        <input type="radio" class="btn-check" id="parkingYes" name="parking" value="yes" <% if(property.parking) { %>checked<% } %> required>
+        <label class="btn btn-outline-success" for="parkingYes">Yes</label>
 
-            <input type="submit" class="btn btn-primary mt-3" value="Save Changes">
-        </form>
-
-        <form action="/properties/<%= propertyId %>/delete" method="POST" class="mt-3">
-            <input type="submit" class="btn btn-danger" value="Delete Property">
-        </form>
+        <input type="radio" class="btn-check" id="parkingNo" name="parking" value="no" <% if(!property.parking) { %>checked<% } %> required>
+        <label class="btn btn-outline-success" for="parkingNo">No</label>
+      </div>
     </div>
+  </div>
+
+  <div class="d-inline-block">
+    <div class="form-group">
+      <label>Public Transportation:</label>
+      <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+        <input type="radio" class="btn-check" id="publicTransYes" name="publicTrans" value="yes" <% if(property.publicTrans) { %>checked<% } %> required>
+        <label class="btn btn-outline-success" for="publicTransYes">Yes</label>
+
+        <input type="radio" class="btn-check" id="publicTransNo" name="publicTrans" value="no" <% if(!property.publicTrans) { %>checked<% } %> required>
+        <label class="btn btn-outline-success" for="publicTransNo">No</label>
+      </div>
+    </div>
+  </div>
+</div>
+
+      
+<br>
+      <div class="form-group">
+        <label for="image">Property Image:</label>
+        <input type="file" id="image" name="image" class="form-control-file">
+      </div>
+<br>
+      <button type="submit" class="btn btn-primary" style="margin-bottom: 30px;">Update Property</button>
+      <a class="btn btn-secondary" href="/properties" style="margin-bottom: 30px;">Back to Properties</a>
+    </form>
+  </div>
 </body>
 </html>

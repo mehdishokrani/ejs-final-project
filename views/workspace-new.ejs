@@ -2,45 +2,170 @@
 <html>
 <head>
   <title>New Workspace</title>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .required-label::after {
+      content: "*";
+      color: red;
+    }
+    
+    .custom-width {
+      width: 80%;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
+    <div class="custom-width mx-auto">
+  <div class="container">
     <h1>New Workspace</h1>
-    <form action="/properties/<%= propertyId %>/workspaces/new" method="POST">
+    <form id="workspaceForm" action="/properties/<%= propertyId %>/workspaces/new" method="POST" enctype="multipart/form-data">
       <div class="form-group">
-        <label for="type">Type</label>
-        <input type="text" id="type" name="type" class="form-control" required>
+        <label class="required-label" for="type">Type:</label>
+        <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+            <input type="radio" class="btn-check" value="meeting room" name="type" id="typeMeetingRoom" autocomplete="off" required checked>
+            <label class="btn btn-outline-success" style="margin-right: 10px;" for="typeMeetingRoom">Meeting Room</label>
+    
+            <input type="radio" class="btn-check" value="private office room" name="type" id="typePrivateOffice" autocomplete="off" required>
+            <label class="btn btn-outline-success" style="margin-right: 10px;" for="typePrivateOffice">Private Office Room</label>
+    
+            <input type="radio" class="btn-check" value="desks in open work area" name="type" id="typeDesk" autocomplete="off" required>
+            <label class="btn btn-outline-success" for="typeDesk">Desks in Open Work Area</label>
+        </div>
       </div>
+    
+    
+    <br>
+    <div class="form-group" style="width: 20%;">
+      <label class="required-label" for="seats">Seats:</label>
+      <input type="number" id="seats" name="seats" class="form-control" required>
+  </div>
+  
+      <br>
       <div class="form-group">
-        <label for="seats">Seats</label>
-        <input type="number" id="seats" name="seats" class="form-control" required>
+        <label class="required-label" for="smoking">Smoking Allowed:</label>
+        <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+            <input type="radio" class="btn-check" id="smokingYes" name="smoking" value="yes" required>
+            <label class="btn btn-outline-success" style="margin-right: 10px;" for="smokingYes">Yes</label>
+            
+            <input type="radio" class="btn-check" id="smokingNo" name="smoking" value="no" required checked>
+            <label class="btn btn-outline-success" for="smokingNo">No</label>
+        </div>
+    </div>
+    <br>
+    <div class="form-group">
+      <label class="required-label" for="printer">Has Printer:</label>
+      <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+          <input type="radio" class="btn-check" id="printerShared" name="printer" value="Shared" required>
+          <label class="btn btn-outline-success" style="margin-right: 10px;" for="printerShared">Shared Printer</label>
+          
+          <input type="radio" class="btn-check" id="printerPrivate" name="printer" value="Private" required>
+          <label class="btn btn-outline-success" style="margin-right: 10px;" for="printerPrivate">Private Printer</label>
+  
+          <input type="radio" class="btn-check" id="printerNone" name="printer" value="No" required checked>
+          <label class="btn btn-outline-success" for="printerNone">No Printer</label>
       </div>
-      <div class="form-group">
-        <label for="smoking">Smoking Allowed</label>
-        <select id="smoking" name="smoking" class="form-control" required>
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-        </select>
+  </div>
+  <br>
+  <div class="form-group">
+      <label class="required-label" for="landline">Land Line:</label>
+      <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+          <input type="radio" class="btn-check" id="landLinePrivate" name="landline" value="Private" required>
+          <label class="btn btn-outline-success" style="margin-right: 10px;" for="landLinePrivate">Private Land Line</label>
+  
+          <input type="radio" class="btn-check" id="landLinePublic" name="landline" value="Public" required>
+          <label class="btn btn-outline-success" style="margin-right: 10px;" for="landLinePublic">Public Land Line</label>
+  
+          <input type="radio" class="btn-check" id="landLineNone" name="landline" value="No" required checked>
+          <label class="btn btn-outline-success" for="landLineNone">No Land Line</label>
       </div>
-      <div class="form-group">
-        <label for="availability">Availability Date</label>
-        <input type="date" id="availability" name="availability" class="form-control" required>
+  </div>
+  <br>
+  <div class="form-group">
+      <label class="required-label" for="hasAirConditioner">Has Air Conditioner:</label>
+      <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+          <input type="radio" class="btn-check" id="airConditionerYes" name="hasAirConditioner" value="yes" required>
+          <label class="btn btn-outline-success" style="margin-right: 10px;" for="airConditionerYes">Yes</label>
+          
+          <input type="radio" class="btn-check" id="airConditionerNo" name="hasAirConditioner" value="no" required checked>
+          <label class="btn btn-outline-success" for="airConditionerNo">No</label>
       </div>
+  </div>
+  <br>
+  <div class="form-group">
+      <label class="required-label" for="hasOnsiteGym">Has Onsite Gym:</label>
+      <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+          <input type="radio" class="btn-check" id="onsiteGymYes" name="hasOnsiteGym" value="yes" required>
+          <label class="btn btn-outline-success" style="margin-right: 10px;" for="onsiteGymYes">Yes</label>
+          
+          <input type="radio" class="btn-check" id="onsiteGymNo" name="hasOnsiteGym" value="no" required checked>
+          <label class="btn btn-outline-success" for="onsiteGymNo">No</label>
+      </div>
+  </div>
+  <br>
+  <div class="form-group">
+      <label class="required-label" for="parking">Has Parking:</label>
+      <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+          <input type="radio" class="btn-check" id="parkingCovered" name="parking" value="Covered" required checked>
+          <label class="btn btn-outline-success" style="margin-right: 10px;" for="parkingCovered">Covered</label>
+  
+          <input type="radio" class="btn-check" id="parkingOpenArea" name="parking" value="Open area" required>
+          <label class="btn btn-outline-success" style="margin-right: 10px;" for="parkingOpenArea">Open Area</label>
+  
+          <input type="radio" class="btn-check" id="parkingNo" name="parking" value="No" required>
+          <label class="btn btn-outline-success" for="parkingNo">No Parking</label>
+      </div>
+  </div>
+  <br>
+  <div class="form-group">
+    <label class="required-label" for="availability">Availability Date:</label>
+    <input 
+      type="date" 
+      id="availability" 
+      name="availability" 
+      class="form-control" 
+      required 
+      min="<%= (function() { const now = new Date(); const year = now.getFullYear(); const month = String(now.getMonth() + 1).padStart(2, '0'); const day = String(now.getDate()).padStart(2, '0'); return `${year}-${month}-${day}`; })() %>"
+      value="<%= (function() { const now = new Date(); const year = now.getFullYear(); const month = String(now.getMonth() + 1).padStart(2, '0'); const day = String(now.getDate()).padStart(2, '0'); return `${year}-${month}-${day}`; })() %>"
+      style="width: 30%;"
+    >
+</div>
+
+      <br>
       <div class="form-group">
         <label for="lease">Lease Term</label>
-        <select id="lease" name="lease" class="form-control" required>
-          <option value="day">Day</option>
-          <option value="week">Week</option>
-          <option value="month">Month</option>
-        </select>
-      </div>
+        <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+            <input type="radio" class="btn-check" id="day" name="lease" value="day" checked>
+            <label class="btn btn-outline-success" style="margin-right: 10px;" for="day">Day</label>
+    
+            <input type="radio" class="btn-check" id="week" name="lease" value="week">
+            <label class="btn btn-outline-success" style="margin-right: 10px;" for="week">Week</label>
+    
+            <input type="radio" class="btn-check" id="month" name="lease" value="month">
+            <label class="btn btn-outline-success" style="margin-right: 10px;" for="month">Month</label>
+    
+            <input type="radio" class="btn-check" id="year" name="lease" value="year">
+            <label class="btn btn-outline-success" for="year">Year</label>
+        </div>
+    </div>
+    <br>
+
       <div class="form-group">
-        <label for="price">Price</label>
-        <input type="number" id="price" name="price" class="form-control" required>
+        <label class="required-label" for="price">Price:</label>
+        <input type="number" id="price" name="price" class="form-control" required style="width: 30%;">
       </div>
-      <button type="submit" class="btn btn-primary">Create Workspace</button>
+  
+      <div class="mb-3">
+        <label for="image" class="form-label">Image</label>
+        <input type="file" class="form-control" id="image" name="image" style="width: 30%;">
+      </div>
+  
+      <button type="submit" class="btn btn-primary">Add Workspace</button>
     </form>
+    <a class="btn btn-secondary mt-3" style="margin-bottom: 30px;" href="/properties/<%= propertyId %>/workspaces">Back to Workspaces</a>
   </div>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

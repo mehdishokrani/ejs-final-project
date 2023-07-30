@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Workspaces by Owner</title>
+</head>
+<body>
+    <h1>Workspaces by Owner</h1>
+    <% for(let owner in workspacesByOwner) { %>
+        <h2><%= owner %>'s Workspaces</h2>
+        <ul>
+            <% workspacesByOwner[owner].forEach((workspace) => { %>
+                <li>
+                    <p>Type: <%= workspace.type %></p>
+                    <p>Seats: <%= workspace.seats %></p>
+                    <p>Smoking: <%= workspace.smoking ? 'Yes' : 'No' %></p>
+                    <p>Availability: <%= workspace.availability %></p>
+                    <p>Lease: <%= workspace.lease %></p>
+                    <p>Price: <%= workspace.price %></p>
+                    <p>Air Conditioner: <%= workspace.hasAirConditioner ? 'Yes' : 'No' %></p>
+                    <p>Printer: <%= workspace.printer %></p>
+                    <p>Landline: <%= workspace.landline %></p>
+                    <p>Gym: <%= workspace.hasOnsiteGym ? 'Yes' : 'No' %></p>
+                    <p>Parking: <%= workspace.parking %></p>
+                </li>
+            <% }) %>
+        </ul>
+    <% } %>
+</body>
+</html>
