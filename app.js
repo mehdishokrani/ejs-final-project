@@ -584,8 +584,6 @@ app.use((req, res, next) => {
 });
 
 app.listen(3000, () => {
-  console.log('Server started on port 3000, please enter localhost3000/signup in URL');
+  console.log('Server started on port 3000');
 });
-
-
 
