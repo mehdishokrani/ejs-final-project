@@ -6,26 +6,23 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const multer = require('multer');
 const fs = require('fs');
-const MongoClient = require('mongodb').MongoClient;
-const ObjectId = require('mongodb').ObjectId;
+const { v4: uuidv4 } = require('uuid');
+const mongoose = require('mongoose');
 
+mongoose.connect('mongodb://127.0.0.1:27017/Coworker-v-1')
+  .then(() => console.log('MongoDB connected...'))
+  .catch(err => console.log(err));
+
+
+const Schema = mongoose.Schema;
 const uploadDirectory = path.join(__dirname, 'uploads');
-
 if (!fs.existsSync(uploadDirectory)) {
   fs.mkdirSync(uploadDirectory);
 }
-const upload = multer({ dest: 'uploads/' });
 
+const upload = multer({ dest: 'uploads/' });
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
-
-let storage = {
-  users: [],
-  properties: {},
-  workspaces: {},
-};
-
-
 app.use(session({
   secret: 'your-secret-key',
   resave: false,
@@ -39,112 +36,128 @@ app.set('view engine', 'ejs');
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+let users = [];
+
+// Define your models here
+const UserSchema = new Schema({
+  id: String,
+  name: String,
+  phone: { type: Number, min: 1 },
+  email: String,
+  role: { type: String, enum: ['Owner', 'Coworker'] },
+  password: String,
+}, { timestamps: true });
+
+const PropertySchema = new Schema({
+  _id: { type: String, default: () => uuidv4() },
+  ownerId: String,
+  address1: String,
+  address2: String,
+  city: String,
+  state: String,
+  postalcode: String,
+  neighborhood: String,
+  sqft: { type: Number, min: 1 },
+  parking: String,
+  publicTrans: String,
+  imageUrl: String,
+  workspaces: Array,
+}, { timestamps: true });
+
+const WorkspaceSchema = new Schema({
+  _id: { type: String, default: () => uuidv4() },
+  propertyId: String,
+  type: String,
+  seats: { type: Number, min: 1 },
+  smoking: String,
+  availability: Date,
+  lease: String,
+  price: { type: Number, min: 1 },
+  hasAirConditioner: String,
+  printer: String,
+  landline: String,
+  hasOnsiteGym: String,
+  parking: String,
+  imageUrl: String,
+}, { timestamps: true });
 
 
-// let users = [];
-storage.users = [];
 
-
-class User {
-  constructor(name, phone, email, role, password) {
-    this.id = Date.now().toString();
-    this.name = name;
-    this.phone = phone;
-    this.email = email;
-    this.role = role;
-    this.password = password;
-  }
-}
-
-class Property {
-  constructor(ownerId, address1, address2, city, state, postalcode, neighborhood, sqft, parking, publicTrans, imageUrl = "") {
-    this.id = Date.now().toString();
-    this.ownerId = ownerId;
-    this.address1 = address1;
-    this.address2 = address2;
-    this.city = city;
-    this.state = state;
-    this.postalcode = postalcode;
-    this.neighborhood = neighborhood;
-    this.sqft = sqft;
-    this.parking = parking;
-    this.publicTrans = publicTrans;
-    this.imageUrl = imageUrl;
-    this.workspaces = [];
-  }
-}
-
-class Workspace {
-  constructor(propertyId, type, seats, smoking, availability, lease, price, hasAirConditioner, printer, landline, hasOnsiteGym, parking, imageUrl = "") {
-    this.id = Date.now().toString();
-    this.propertyId = propertyId;
-    this.type = type;
-    this.seats = seats;
-    this.smoking = smoking;
-    this.availability = availability;
-    this.lease = lease;
-    this.price = price;
-    this.hasAirConditioner = hasAirConditioner;
-    this.printer = printer;
-    this.landline = landline;
-    this.hasOnsiteGym = hasOnsiteGym;
-    this.parking = parking;
-    this.imageUrl = imageUrl;
-  }
-}
+const UserModel = mongoose.model('User', UserSchema);
+const PropertyModel = mongoose.model('Property', PropertySchema);
+const WorkspaceModel = mongoose.model('Workspace', WorkspaceSchema);
 
 
 app.get('/signup', (req, res) => {
-  res.render('signup');
+  res.render('signup', { error: null });
 });
 
 app.post('/signup', async (req, res) => {
   try {
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    const user = new User(
-      req.body.name,
-      req.body.phoneNumber,
-      req.body.email,
-      req.body.role,
-      hashedPassword
-    );
+    // Get the form input
+    const { name, phoneNumber, email, role, password } = req.body;
+  
+    // Validate input
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const nameRegex = /^[A-Za-z\s]+$/;
 
-    let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-    if(user.password.length < 8) {
+    if (password.length < 8) {
       return res.render('signup', { error: 'Password must be at least 8 characters long.' });
     }
-
-    if(user.name.length < 3 || !(/^[A-Za-z\s]+$/.test(user.name))) {
+    
+    if (name.length < 3 || !nameRegex.test(name)) {
       return res.render('signup', { error: 'Name must be at least 3 characters long and only contain alphabet characters or spaces.' });
     }
 
-    if(user.phone.length < 8 || isNaN(user.phone)) {
+    if (phoneNumber.length < 8 || isNaN(phoneNumber)) {
       return res.render('signup', { error: 'Phone number must be at least 8 digits.' });
     }
 
-    if(!emailRegex.test(user.email)) {
+    if (!emailRegex.test(email)) {
       return res.render('signup', { error: 'Email must be valid and end with a valid domain extension.' });
     }
+    
+    // Check if role is either 'Owner' or 'Coworker'
+    if (!['Owner', 'Coworker'].includes(role)) {
+      return res.render('signup', { error: 'Role must be either "Owner" or "Coworker"' });
+    }
+    
+    // Check if email already exists in the database
+    const existingUser = await UserModel.findOne({ email });
+    if (existingUser) {
+      return res.render('signup', { error: 'Email already in use' });
+    }
 
-    // Save user in memory
-    storage.users.push(user);
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create new user
+    const user = new UserModel({ name, phone: phoneNumber, email, role, password: hashedPassword });
+
+    // Save user to the database
+    await user.save();
+
+    // Redirect to login page
     res.redirect('/login');
-  } catch {
+  } catch (error) {
+    console.error(error);
     res.redirect('/signup');
   }
 });
 
 
+
 app.get('/login', (req, res) => {
-  res.render('login');
+  res.render('login', { error: null });
 });
 
 let loginAttempts = {};
 
 app.post('/login', async (req, res) => {
   const email = req.body.email;
-  const user = storage.users.find(user => user.email === email);
+
+  // Fetch user from database
+  const user = await UserModel.findOne({ email });
 
   if (user == null) {
     return res.render('login', { error: 'This Username or Email does not exist' });
@@ -177,6 +190,7 @@ app.post('/login', async (req, res) => {
 });
 
 
+
 function checkOwner(req, res, next) {
   if (!req.session.user || req.session.user.role !== 'Owner') {
     return res.status(403).redirect('/login');
@@ -193,99 +207,143 @@ function checkLoggedIn(req, res, next) {
 }
 
 
-app.get('/properties', checkLoggedIn, checkOwner, (req, res) => {
-  const properties = Object.values(storage.properties).filter(prop => prop.ownerId === req.session.user.id);
-  res.render('properties', { properties: properties });
+app.get('/properties', checkLoggedIn, checkOwner, async (req, res) => {
+  try {
+    const properties = await PropertyModel.find({ ownerId: req.session.user.id }).exec();
+    const propertiesWithWorkspaces = await Promise.all(properties.map(async property => {
+      const workspaces = await WorkspaceModel.find({ propertyId: property._id }).exec();
+      // Attach the workspaces to the property
+      property.workspaces = workspaces;
+      return property;
+    }));
+    res.render('properties', { properties: propertiesWithWorkspaces });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Internal Server Error");
+  }
 });
+
 
 app.get('/properties/new', checkLoggedIn, checkOwner, (req, res) => {
   res.render('property-new');
 });
 
-app.post('/properties/new', checkLoggedIn, checkOwner, upload.single('image'), (req, res) => {
+app.post('/properties/new', checkLoggedIn, checkOwner, upload.single('image'), async (req, res) => {
   let imageUrl = "";
 
   if(req.file) {
-    imageUrl = req.file.filename;
+    imageUrl = path.join('uploads', req.file.filename);
   }
 
-  const property = new Property(
-    req.session.user.id,
-    req.body.address1,
-    req.body.address2,
-    req.body.city,
-    req.body.state,
-    req.body.postalcode,
-    req.body.neighborhood,
-    req.body.sqft,
-    req.body.parking,
-    req.body.publicTrans,
-    imageUrl
-  );
+  try {
+    const property = new PropertyModel({
+      ownerId: req.session.user.id,
+      address1: req.body.address1,
+      address2: req.body.address2,
+      city: req.body.city,
+      state: req.body.state,
+      postalcode: req.body.postalcode,
+      neighborhood: req.body.neighborhood,
+      sqft: req.body.sqft,
+      parking: req.body.parking,
+      publicTrans: req.body.publicTrans,
+      imageUrl: imageUrl
+    });
 
-  storage.properties[property.id] = property;
-  res.redirect('/properties');
+    await property.save();
+    res.redirect('/properties');
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+app.get('/properties/:propertyId/edit', checkLoggedIn, checkOwner, async (req, res) => {
+  try {
+    const property = await PropertyModel.findOne({ _id: req.params.propertyId, ownerId: req.session.user.id }).exec();
+
+    if (property == null) {
+      return res.status(404).send('Property not found');
+    }
+
+    res.render('property-edit', { property: property });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
 
 
-// app.get('/properties/:id', checkOwner, (req, res) => {
-//   const property = storage[req.session.user.email].properties[req.params.id];
-//   if (!property) {
-//     return res.status(404).send('Property not found');
-//   }
-//   res.render('property', { property });
-// });
 
-app.get('/properties/:propertyId/edit', checkLoggedIn, checkOwner, (req, res) => {
-  const property = storage.properties[req.params.id];
+app.post('/properties/:propertyId/edit', checkLoggedIn, checkOwner, upload.single('image'), async (req, res) => {
+  try {
+    const property = await PropertyModel.findOne({ _id: req.params.propertyId, ownerId: req.session.user.id }).exec();
 
-  if (property == null) {
-    return res.status(404).send('Property not found');
+    if (property == null) {
+      return res.status(404).send('Property not found');
+    }
+
+    if (req.file) {
+      property.imageUrl = path.join('uploads', req.file.filename);
+    }
+
+    property.address1 = req.body.address1;
+    property.address2 = req.body.address2;
+    property.city = req.body.city;
+    property.state = req.body.state;
+    property.postalcode = req.body.postalcode;
+    property.neighborhood = req.body.neighborhood;
+    property.sqft = req.body.sqft;
+    property.parking = req.body.parking;
+    property.publicTrans = req.body.publicTrans;
+
+    await property.save();
+    res.redirect('/properties');
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Internal Server Error");
   }
-
-  if (property.ownerId !== req.session.user.id) {
-    return res.status(403).send('Unauthorized');
-  }
-
-  res.render('editproperty', { property: property });
 });
 
-app.post('/properties/:propertyId/edit', checkLoggedIn, checkOwner, upload.single('image'), (req, res) => {
-  const property = storage.properties[req.params.id];
-
-  if (property == null) {
-    return res.status(404).send('Property not found');
+app.post('/properties/:propertyId/delete', async (req, res) => {
+  try {
+    const propertyId = req.params.propertyId;
+    console.log("Delete property with ID:", propertyId);
+    const ans = await PropertyModel.deleteOne({_id: propertyId});
+    console.log("Delete result:", ans);
+    if(ans.deletedCount > 0) {
+      console.log("Property deleted successfully");
+      res.redirect('/properties');
+    } else {
+      console.log("Property not found, nothing deleted");
+      res.status(404).send('Property not found');
+    }
+  } catch (err) {
+    console.log("Error during deletion:", err);
+    res.status(500).send('Internal server error');
   }
-
-  if (property.ownerId !== req.session.user.id) {
-    return res.status(403).send('Unauthorized');
-  }
-
-  if (req.file) {
-    property.imageUrl = req.file.filename;
-  }
-
-  property.address1 = req.body.address1;
-  property.address2 = req.body.address2;
-  property.city = req.body.city;
-  property.state = req.body.state;
-  property.postalcode = req.body.postalcode;
-  property.neighborhood = req.body.neighborhood;
-  property.sqft = req.body.sqft;
-  property.parking = req.body.parking;
-  property.publicTrans = req.body.publicTrans;
-
-  res.redirect('/properties');
 });
 
 
-app.get('/properties/:propertyId/workspaces', checkOwner, (req, res) => {
-  const property = req.session.user.properties[req.params.propertyId];
-  if (!property) {
-    return res.status(404).send('Property not found');
+
+
+app.get('/properties/:propertyId/workspaces', checkOwner, async (req, res) => {
+  try {
+    // ... existing code ...
+    const workspaces = await WorkspaceModel.find({ propertyId: req.params.propertyId }).exec();
+    
+    if (!Array.isArray(workspaces)) {
+      console.log('Workspaces is not an array. Instead, it is a(n)', typeof workspaces);
+    } else {
+      console.log('Number of workspaces:', workspaces.length);
+    }
+
+    res.render('workspaces', { propertyId: req.params.propertyId, workspaces: workspaces });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Internal server error');
   }
-  res.render('workspaces', { propertyId: req.params.propertyId, workspaces: property.workspaces });//Here**********
 });
 
 
@@ -295,290 +353,200 @@ app.get('/properties/:propertyId/workspaces/new', checkOwner, (req, res) => {
   res.render('workspace-new', { propertyId });
 });
 
-app.post('/properties/:propertyId/workspaces/new', upload.single('image'), checkOwner, (req, res) => {
-  const property = storage[req.session.user.email].properties[req.params.propertyId];
-  if (!property) {
-    return res.status(404).send('Property not found');
-  }
-
-  // Create a new workspace
+app.post('/properties/:propertyId/workspaces/new', upload.single('image'), checkOwner, async (req, res) => {
   let imageUrl = '';
   if (req.file) {
-    imageUrl = '/uploads/' + req.file.filename; // this assumes the file is saved in 'uploads' directory in your project
+    imageUrl = '/uploads/' + req.file.filename; 
   }
-  const workspace = new Workspace(
-    req.body.type,
-    req.body.seats,
-    req.body.smoking === 'yes',
-    req.body.availability, // Get availability date from the form data
-    req.body.lease, // Get lease term from the form data
-    req.body.price,
-    req.body.hasAirConditioner === 'yes',
-    req.body.printer,
-    req.body.landline,
-    req.body.hasOnsiteGym === 'yes',
-    req.body.parking,
-    imageUrl
-  );
+  try {
+    const workspace = new WorkspaceModel({
+      propertyId: req.params.propertyId,
+      type: req.body.type,
+      seats: req.body.seats,
+      smoking: req.body.smoking === 'yes',
+      availability: req.body.availability,
+      lease: req.body.lease,
+      price: req.body.price,
+      hasAirConditioner: req.body.hasAirConditioner === 'yes',
+      printer: req.body.printer,
+      landline: req.body.landline,
+      hasOnsiteGym: req.body.hasOnsiteGym === 'yes',
+      parking: req.body.parking,
+      imageUrl: imageUrl
+    });
 
-  // Generate a unique ID for the workspace
-  const id = crypto.randomBytes(16).toString('hex');
-
-  // Add the new workspace to the property
-  property.workspaces[id] = workspace;
-
-
-  // Redirect to the workspaces page for this property
-  res.redirect('/properties/' + req.params.propertyId + '/workspaces');
+    await workspace.save();
+    res.redirect('/properties/' + req.params.propertyId + '/workspaces');
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Internal server error');
+  }
 });
 
-app.get('/properties/:propertyId/workspaces/:workspaceId', (req, res) => {
-  const property = req.session.user.properties[req.params.propertyId];
-  if (!property) {
-    return res.status(404).send('Property not found');
-  }
-  const workspace = property.workspaces[req.params.workspaceId];
-  if (!workspace) {
-    return res.status(404).send('Workspace not found');
-  }
-  res.render('workspace', { workspace });
-});
+// app.get('/properties/:propertyId/workspaces/:workspaceId', async (req, res) => {
+//   try {
+//     const workspace = await WorkspaceModel.findOne({ _id: req.params.workspaceId, propertyId: req.params.propertyId }).exec();
+//     if (!workspace) {
+//       return res.status(404).send('Workspace not found');
+//     }
+//     res.render('workspaces', { workspace });
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).send('Internal server error');
+//   }
+// });
 
-app.get('/properties/:propertyId/edit', checkOwner, (req, res) => {
-  const property = req.session.user.properties[req.params.propertyId];
-  if (!property) {
-    return res.status(404).send('Property not found');
-  }
-  res.render('property-edit', { propertyId: req.params.propertyId, property: property });
-});
 
-app.post('/properties/:propertyId/edit', upload.single('image'), checkOwner, (req, res) => {
-  const propertyId = req.params.propertyId;
-  const properties = storage[req.session.user.email].properties;
-
-  if (!properties[propertyId]) {
-    return res.status(404).send('Property not found');
-  }
-
-  if (req.file) {
-    const imagePath = path.join(__dirname, 'public', properties[propertyId].imageUrl);
-    if (fs.existsSync(imagePath)) {
-      fs.unlinkSync(imagePath);
+app.get('/properties/:propertyId/workspaces/:workspaceId/edit', checkOwner, async (req, res) => {
+  try {
+    const property = await PropertyModel.findOne({ _id: req.params.propertyId, ownerId: req.session.user.id });
+    
+    if (!property) {
+      return res.status(404).send('Property not found');
     }
 
-    properties[propertyId].imageUrl = '/uploads/' + req.file.filename;
-  }
+    const workspace = await WorkspaceModel.findOne({ _id: req.params.workspaceId, propertyId: req.params.propertyId });
 
-  properties[propertyId] = {
-    ...properties[propertyId],
-    address1: req.body.address1,
-    address2: req.body.address2,
-    city: req.body.city,
-    state: req.body.state,
-    postalcode: req.body.postalcode,
-    neighborhood: req.body.neighborhood,
-    sqft: req.body.sqft,
-    parking: req.body.parking === 'yes',
-    publicTrans: req.body.publicTrans === 'yes',
-  };
-
-  res.redirect('/properties');
-});
-
-app.post('/properties/:propertyId/delete', checkOwner, (req, res) => {
-  const propertyId = req.params.propertyId;
-  const properties = req.session.user.properties;
-
-  if (!properties[propertyId]) {
-    return res.status(404).send('Property not found');
-  }
-
-  // If an image exists for this property
-  if (properties[propertyId].imageUrl) {
-    // Delete the existing image
-    try {
-      fs.unlinkSync(path.join(__dirname, 'public', properties[propertyId].imageUrl));
-    } catch (err) {
-      console.error(err);
-      // You can handle the error here. For instance, you may choose to
-      // send a response with an error message.
+    if (!workspace) {
+      return res.status(404).send('Workspace not found');
     }
+
+    const workspaceObj = workspace.toObject();
+
+    workspaceObj.defaultType = workspaceObj.type;
+    workspaceObj.defaultSeats = workspaceObj.seats;
+    workspaceObj.defaultSmoking = workspaceObj.smoking === 'yes' ? 'yes' : 'no';
+    workspaceObj.defaultAvailability = workspaceObj.availability;
+    workspaceObj.defaultLease = workspaceObj.lease;
+    workspaceObj.defaultPrice = workspaceObj.price;
+    workspaceObj.defaultHasAirConditioner = workspaceObj.hasAirConditioner === 'yes' ? 'yes' : 'no'
+    workspaceObj.defaultPrinter = workspaceObj.printer;
+    workspaceObj.defaultLandline = workspaceObj.landline;
+    workspaceObj.defaultHasOnsiteGym = workspaceObj.hasOnsiteGym === 'yes' ? 'yes' : 'no';
+    workspaceObj.defaultParking = workspaceObj.parking;
+
+    res.render('workspace-edit', {
+      propertyId: req.params.propertyId,
+      workspaceId: req.params.workspaceId,
+      ...workspaceObj
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server Error');
   }
-
-  // Remove the property from the list
-  delete properties[propertyId];
-
-  res.redirect('/properties');
 });
 
 
+app.post('/properties/:propertyId/workspaces/:workspaceId/edit', upload.single('image'), checkOwner, async (req, res) => {
+  try {
+    const property = await PropertyModel.findOne({ _id: req.params.propertyId, ownerId: req.session.user.id });
 
-app.get('/owner/workspaces', checkOwner, (req, res) => {
-  let workspacesList = [];
-  for (let propertyId in req.session.user.properties) {
-    let property = req.session.user.properties[propertyId];
-    for (let workspaceId in property.workspaces) {
-      let workspace = property.workspaces[workspaceId];
-      workspace.propertyId = propertyId; // You might want to know the propertyId for each workspace
-      workspace.workspaceId = workspaceId; // Set workspaceId
-
-      // Construct address string
-      let address = property.address1;
-      if(property.address2) address += ', ' + property.address2;
-      address += ', ' + property.city;
-      address += ', ' + property.state;
-      address += ', ' + property.postalcode;
-
-      workspace.propertyAddress = address; // Set propertyAddress
-
-      workspacesList.push(workspace);
+    if (!property) {
+      return res.status(404).send('Property not found');
     }
-  }
-  res.render('workspaces-all-owner', {workspaces: workspacesList});
-});
 
+    const workspace = await WorkspaceModel.findOne({ _id: req.params.workspaceId, propertyId: req.params.propertyId });
 
-
-
-app.get('/properties/:propertyId/workspaces/:workspaceId/edit', checkOwner, (req, res) => {
-  const property = req.session.user.properties[req.params.propertyId];
-  if (!property) {
-    return res.status(404).send('Property not found');
-  }
-  const workspace = property.workspaces[req.params.workspaceId];
-  if (!workspace) {
-    return res.status(404).send('Workspace not found');
-  }
-
-// Create default values for each field based on the workspace data
-const defaultType = workspace.type;
-const defaultSeats = workspace.seats;
-const defaultSmoking = workspace.smoking ? 'yes' : 'no';
-const defaultAvailability = workspace.availability;
-const defaultLease = workspace.lease;
-const defaultPrice = workspace.price;
-const defaultHasAirConditioner = workspace.hasAirConditioner ? 'yes' : 'no';
-const defaultPrinter = workspace.printer;
-const defaultLandline = workspace.landline;
-const defaultHasOnsiteGym = workspace.hasOnsiteGym ? 'yes' : 'no';
-const defaultParking = workspace.parking;
-
-  res.render('workspace-edit', { propertyId: req.params.propertyId, workspaceId: req.params.workspaceId, workspace: workspace,
-    defaultType: defaultType,
-    defaultSeats: defaultSeats,
-    defaultSmoking: defaultSmoking,
-    defaultAvailability: defaultAvailability,
-    defaultLease: defaultLease,
-    defaultPrice: defaultPrice,
-    defaultHasAirConditioner: defaultHasAirConditioner,
-    defaultPrinter: defaultPrinter,
-    defaultLandline: defaultLandline,
-    defaultHasOnsiteGym: defaultHasOnsiteGym,
-    defaultParking: defaultParking
-  
-  });
-});
-
-app.post('/properties/:propertyId/workspaces/:workspaceId/edit', upload.single('image'), checkOwner, (req, res) => {
-  const property = req.session.user.properties[req.params.propertyId];
-  if (!property) {
-    return res.status(404).send('Property not found');
-  }
-  let workspace = property.workspaces[req.params.workspaceId];
-  if (!workspace) {
-    return res.status(404).send('Workspace not found');
-  }
-
-  workspace.type = req.body.type;
-  workspace.seats = req.body.seats;
-  workspace.smoking = req.body.smoking === 'yes';
-  workspace.availability = req.body.availability;
-  workspace.lease = req.body.lease;
-  workspace.price = req.body.price;
-  workspace.hasAirConditioner = req.body.hasAirConditioner === 'yes';
-  workspace.printer = req.body.printer;
-  workspace.landline = req.body.landline;
-  workspace.hasOnsiteGym = req.body.hasOnsiteGym === 'yes';
-  workspace.parking = req.body.parking;
-
-  if (req.file) {
-    const imagePath = path.join(uploadDirectory, workspace.imageUrl);
-    if (fs.existsSync(imagePath)) {
-      fs.unlinkSync(imagePath);
+    if (!workspace) {
+      return res.status(404).send('Workspace not found');
     }
-    workspace.imageUrl = req.file.filename;
-  }
 
-  res.redirect('/properties/' + req.params.propertyId + '/workspaces');
-});
+    workspace.type = req.body.type;
+    workspace.seats = req.body.seats;
+    workspace.smoking = req.body.smoking === 'yes';
+    workspace.availability = req.body.availability;
+    workspace.lease = req.body.lease;
+    workspace.price = req.body.price;
+    workspace.hasAirConditioner = req.body.hasAirConditioner === 'yes';
+    workspace.printer = req.body.printer;
+    workspace.landline = req.body.landline;
+    workspace.hasOnsiteGym = req.body.hasOnsiteGym === 'yes';
+    workspace.parking = req.body.parking;
 
-app.post('/properties/:propertyId/workspaces/:workspaceId/delete', checkOwner, (req, res) => {
-  const property = req.session.user.properties[req.params.propertyId];
-  if (!property) {
-    return res.status(404).send('Property not found');
-  }
-  let workspace = property.workspaces[req.params.workspaceId];
-  if (!workspace) {
-    return res.status(404).send('Workspace not found');
-  }
-
-  if (workspace.imageUrl) {
-    try {
-      fs.unlinkSync(path.join(uploadDirectory, workspace.imageUrl));
-    } catch (err) {
-      console.error(err);
+    if (req.file) {
+      const imagePath = path.join(uploadDirectory, workspace.imageUrl);
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+      workspace.imageUrl = req.file.filename;
     }
-  }
 
-  delete property.workspaces[req.params.workspaceId];
-  res.redirect('/properties/' + req.params.propertyId + '/workspaces');
+    await workspace.save();
+
+    res.redirect(`/properties/${req.params.propertyId}/workspaces`);
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Internal server error');
+  }
 });
 
 
+app.get('/owner/workspaces', checkOwner, async (req, res) => {
+  try {
+    const properties = await PropertyModel.find({ ownerId: req.session.user.id }).exec();
+    let workspacesList = [];
 
-
-
-
-app.get('/allworkspaces', (req, res) => {
-  let workspacesList = [];
-  for (let user of storage.users) {
-    for (let propertyId in user.properties) {
-      let property = user.properties[propertyId];
-      for (let workspaceId in property.workspaces) {
-        let workspace = property.workspaces[workspaceId];
-        workspace.propertyId = propertyId;
-        workspace.workspaceId = workspaceId;
-
-        // Construct address string
+    for (let property of properties) {
+      const workspaces = await WorkspaceModel.find({ propertyId: property._id }).exec();
+      for (let workspace of workspaces) {
+        workspace = workspace.toObject(); // Convert document to a plain javascript object
+        workspace.propertyId = property._id;
+        
         let address = property.address1;
         if(property.address2) address += ', ' + property.address2;
         address += ', ' + property.city;
         address += ', ' + property.state;
         address += ', ' + property.postalcode;
-
+        
         workspace.propertyAddress = address;
+
         workspacesList.push(workspace);
       }
     }
-  }
-  console.log(workspacesList)
-  res.render('allworkspaces', { workspaces:workspacesList });
 
+    res.render('workspaces-all-owner', {workspaces: workspacesList});
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Internal server error');
+  }
 });
 
 
+app.post('/properties/:propertyId/workspaces/:workspaceId/delete', checkOwner, async (req, res) => {
+  try {
+    const property = await PropertyModel.findOne({ _id: req.params.propertyId, ownerId: req.session.user.id });
+    
+    if (!property) {
+      return res.status(404).send('Property not found');
+    }
 
+    const workspace = await WorkspaceModel.findOne({ _id: req.params.workspaceId, propertyId: req.params.propertyId });
+    
+    if (!workspace) {
+      return res.status(404).send('Workspace not found');
+    }
 
+    if (workspace.imageUrl) {
+      try {
+        fs.unlinkSync(path.join(uploadDirectory, workspace.imageUrl));
+      } catch (err) {
+        console.error(err);
+      }
+    }
 
+    await workspace.remove();
+    
+    res.redirect('/properties/' + req.params.propertyId + '/workspaces');
+    
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Internal server error');
+  }
+});
 
-
-
-
-
-
-
-app.use((req, res, next) => {
-  if (!req.session.user && ['/login', '/signup'].indexOf(req.url) === -1) {
+app.use(async (req, res, next) => {
+  if (!req.session.user && !['/login', '/signup'].includes(req.path)) {
     return res.redirect('/login');
   }
   next();

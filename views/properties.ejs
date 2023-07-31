@@ -22,11 +22,13 @@
         <th scope="col">Public Transportation</th>
         <th scope="col">Workspaces</th>
         <th scope="col">Actions</th>
-        <th scope="col">Image</th> <!-- You may add this for header of Image column -->
+        <th scope="col">Image</th> <!-- You may add this for the header of the Image column -->
       </tr>
     </thead>
     <tbody>
       <% for (let id in properties) { %>
+        <% if (properties[id].address1) { %>
+          <% if (properties[id].sqft) { %>
         <tr>
           <td>
             <%= properties[id].address1 %>
@@ -39,19 +41,20 @@
           </td>
           <td><%= properties[id].neighborhood %></td>
           <td><%= properties[id].sqft %></td>
-          <td><%= properties[id].parking ? 'Yes' : 'No' %></td>
-          <td><%= properties[id].publicTrans ? 'Yes' : 'No' %></td>
-          <td><%= Object.keys(properties[id].workspaces).length %></td>
+          <!-- Assuming properties is an array of objects and id is the index of the object you want to access -->
+          <td><%= properties[id].parking === 'yes' ? 'yes' : 'no' %></td>
+          <td><%= properties[id].publicTrans === 'yes' ? 'yes' : 'no' %></td>
+          <td><%= properties[id].workspaces.length %></td>
           <td>
-            <a class="btn btn-primary" href="/properties/<%= id %>/workspaces">View Workspaces</a>
-            <a class="btn btn-warning" href="/properties/<%= id %>/edit">Edit</a>
-            <form action="/properties/<%= id %>/delete" method="POST" style="display: inline;">
+            <a class="btn btn-primary" href="/properties/<%= properties[id]._id %>/workspaces">View Workspaces</a>
+            <a class="btn btn-warning" href="/properties/<%= properties[id]._id %>/edit">Edit</a>
+            <form action="/properties/<%= properties[id]._id %>/edit" method="POST" enctype="multipart/form-data">
               <input class="btn btn-danger" type="submit" value="Delete">
             </form>
           </td>
           <td><img src="<%= properties[id].imageUrl %>" alt="Image of <%= properties[id].address1 %>" style="width: 100px; height: 100px;"></td> <!-- Add this line -->
         </tr>
-      <% } %>
+      <% } } }%>
     </tbody>
   </table>
   <a class="btn btn-success" href="/properties/new">Add Property</a>

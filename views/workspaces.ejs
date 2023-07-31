@@ -30,30 +30,31 @@
       </tr>
     </thead>
     <tbody>
-      <% for(let id in workspaces) { %>
+      <% workspaces.forEach((workspace) => { %>
         <tr>
-          <td><%= workspaces[id].type %></td>
-          <td><%= workspaces[id].seats %></td>
-          <td><%= workspaces[id].smoking ? 'Yes' : 'No' %></td>
-          <td><%= workspaces[id].availability %></td>
-          <td><%= workspaces[id].lease %></td>
-          <td><%= workspaces[id].price %></td>
-          <td><%= workspaces[id].hasAirConditioner ? 'Yes' : 'No' %></td>
-          <td><%= workspaces[id].printer %></td>
-          <td><%= workspaces[id].landline %></td>
-          <td><%= workspaces[id].hasOnsiteGym ? 'Yes' : 'No' %></td>
-          <td><%= workspaces[id].parking %></td>
+          <td><%= workspace.type %></td>
+          <td><%= workspace.seats %></td>
+          <td><%= workspace.smoking ? 'yes' : 'no' %></td>
+          <td><%= workspace.availability %></td>
+          <td><%= workspace.lease %></td>
+          <td><%= workspace.price %></td>
+          <td><%= workspace.hasAirConditioner ? 'yes' : 'no' %></td>
+          <td><%= workspace.printer %></td>
+          <td><%= workspace.landline %></td>
+          <td><%= workspace.hasOnsiteGym ? 'yes' : 'no' %></td>
+          <td><%= workspace.parking %></td>
           <td>
-            <img src="<%= workspaces[id].imageUrl %>" alt="Image of <%= workspaces[id].type %>" style="width: 100px; height: 100px;">
+            <img src="<%= workspace.imageUrl %>" alt="Image of <%= workspace.type %>" style="width: 100px; height: 100px;">
           </td>
           <td>
-            <a class="btn btn-warning btn-custom-workspaces" style="width: 72px;" href="/properties/<%= propertyId %>/workspaces/<%= id %>/edit">Edit</a>
-            <form action="/properties/<%= propertyId %>/workspaces/<%= id %>/delete" method="POST" style="display: inline;">
+            <a class="btn btn-warning btn-custom-workspaces" style="width: 72px;" href="/properties/<%= propertyId %>/workspaces/<%= workspace._id %>/edit">Edit</a>
+            <form action="/properties/<%= propertyId %>/workspaces/<%= workspace._id %>/delete" method="POST" style="display: inline;">
               <input class="btn btn-danger" type="submit" value="Delete">
             </form>
           </td>
         </tr>
-      <% } %>
+      <% }); %>
+      
     </tbody>
   </table>
   <a class="btn btn-success" href="/properties/<%= propertyId %>/workspaces/new" style="margin-bottom: 30px;">Add Workspace</a>
