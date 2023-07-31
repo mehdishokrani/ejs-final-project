@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>All Workspaces</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- CSS only -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h1>All Workspaces</h1>
+        <table class="table mt-3">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Type</th>
+                    <th scope="col">Seats</th>
+                    <th scope="col">Smoking</th>
+                    <th scope="col">Availability</th>
+                    <th scope="col">Lease</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Air Conditioner</th>
+                    <th scope="col">Printer</th>
+                    <th scope="col">Landline</th>
+                    <th scope="col">Gym</th>
+                    <th scope="col">Parking</th>
+                    <th scope="col">Image</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% workspaces.forEach(function(workspace){ %>
+                    <tr>
+                        <td><%= workspace.type %></td>
+                        <td><%= workspace.seats %></td>
+                        <td><%= workspace.smoking ? 'Yes' : 'No' %></td>
+                        <td><%= workspace.availability %></td>
+                        <td><%= workspace.lease %></td>
+                        <td><%= workspace.price %></td>
+                        <td><%= workspace.hasAirConditioner ? 'Yes' : 'No' %></td>
+                        <td><%= workspace.printer %></td>
+                        <td><%= workspace.landline %></td>
+                        <td><%= workspace.hasOnsiteGym ? 'Yes' : 'No' %></td>
+                        <td><%= workspace.parking %></td>
+                        <td>
+                            <% if(workspace.imageUrl) { %>
+                                <img src="<%= workspace.imageUrl %>" alt="Workspace Image" style="width: 100px;">
+                            <% } else { %>
+                                No image
+                            <% } %>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- JS, Popper.js, and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+
+</html>
