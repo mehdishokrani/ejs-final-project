@@ -192,7 +192,7 @@ app.post('/login', async (req, res) => {
       if(user.role === 'Owner') {
         res.redirect('/properties');
       } else {
-        res.redirect('/allworkspaces');
+        res.redirect('/');
       }
     } else {
       loginAttempts[email] = (loginAttempts[email] || 0) + 1;
