@@ -48,7 +48,7 @@
           <td>
             <a class="btn btn-primary" href="/properties/<%= properties[id]._id %>/workspaces">View Workspaces</a>
             <a class="btn btn-warning" href="/properties/<%= properties[id]._id %>/edit">Edit</a>
-            <form action="/properties/<%= properties[id]._id %>/edit" method="POST" enctype="multipart/form-data">
+            <form action="/properties/<%= properties[id]._id %>/delete" method="POST" enctype="multipart/form-data">
               <input class="btn btn-danger" type="submit" value="Delete">
             </form>
           </td>

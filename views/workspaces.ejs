@@ -34,17 +34,17 @@
         <tr>
           <td><%= workspace.type %></td>
           <td><%= workspace.seats %></td>
-          <td><%= workspace.smoking ? 'yes' : 'no' %></td>
-          <td><%= workspace.availability %></td>
+          <td><%= workspace.smoking == "true" ? 'yes' : 'no' %></td>
+          <td><%= workspace.availability.toLocaleDateString() %></td>
           <td><%= workspace.lease %></td>
           <td><%= workspace.price %></td>
-          <td><%= workspace.hasAirConditioner ? 'yes' : 'no' %></td>
+          <td><%= workspace.hasAirConditioner === 'true' ? 'yes' : 'no' %></td>
           <td><%= workspace.printer %></td>
           <td><%= workspace.landline %></td>
-          <td><%= workspace.hasOnsiteGym ? 'yes' : 'no' %></td>
+          <td><%= workspace.hasOnsiteGym ==="true" ? 'yes' : 'no' %></td>
           <td><%= workspace.parking %></td>
           <td>
-            <img src="<%= workspace.imageUrl %>" alt="Image of <%= workspace.type %>" style="width: 100px; height: 100px;">
+            <img src="<%= workspace.imageUrl %>" alt="No image for <%= workspace.type %>" style="width: 100px; height: 100px;">
           </td>
           <td>
             <a class="btn btn-warning btn-custom-workspaces" style="width: 72px;" href="/properties/<%= propertyId %>/workspaces/<%= workspace._id %>/edit">Edit</a>

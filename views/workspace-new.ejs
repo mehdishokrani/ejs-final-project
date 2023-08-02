@@ -36,10 +36,11 @@
     
     
     <br>
-    <div class="form-group" style="width: 20%;">
-      <label class="required-label" for="seats">Seats:</label>
-      <input type="number" id="seats" name="seats" class="form-control" required>
-  </div>
+<div class="form-group" style="width: 20%;">
+  <label class="required-label" for="seats">Seats:</label>
+  <input type="number" id="seats" name="seats" class="form-control" required  min="1" max="999">
+</div>
+
   
       <br>
       <div class="form-group">
@@ -150,10 +151,11 @@
     </div>
     <br>
 
-      <div class="form-group">
-        <label class="required-label" for="price">Price:</label>
-        <input type="number" id="price" name="price" class="form-control" required style="width: 30%;">
-      </div>
+    <div class="form-group">
+      <label class="required-label" for="price">Price:</label>
+      <input type="number" id="price" name="price" class="form-control" required style="width: 30%;" min="1" max="999999">
+    </div>
+    
   
       <div class="mb-3">
         <label for="image" class="form-label">Image</label>
