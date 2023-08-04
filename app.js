@@ -91,24 +91,25 @@ const WorkspaceModel = mongoose.model('Workspace', WorkspaceSchema);
 
 app.get('/', async (req, res) => {
   try {
-    const workspaces = await WorkspaceModel.find({}).exec();
+    // Retrieve all workspaces
+    const workspaces = await WorkspaceModel.find().exec();
 
-    if (!Array.isArray(workspaces)) {
-      console.log('Workspaces is not an array. Instead, it is a(n)', typeof workspaces);
-    } else {
-      console.log('Number of workspaces:', workspaces.length);
-    }
-
-    // Fetch the related properties for each workspace
+    // Retrieve all properties associated with those workspaces
     const workspaceIds = workspaces.map(workspace => workspace.propertyId);
     const properties = await PropertyModel.find({ _id: { $in: workspaceIds } }).exec();
 
-    res.render('home', { workspaces: workspaces, properties: properties});
+    res.render('home', { workspaces: workspaces, properties: properties });
   } catch (err) {
     console.log(err);
     res.status(500).send('Internal server error');
   }
 });
+
+
+function escapeRegex(text) {
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
+
 
 
 app.get('/signup', (req, res) => {
