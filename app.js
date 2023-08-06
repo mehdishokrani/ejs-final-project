@@ -9,12 +9,14 @@ const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
 const mongoose = require("mongoose");
 
-const signupRouter = require('./routes/signup');
-const loginRouter = require('./routes/login');
+const signupRouter = require("./routes/signup");
+const loginRouter = require("./routes/login");
 
-const { checkOwner, checkCoworker, checkLoggedIn } = require('./public/owner_login_check');
-
-
+const {
+  checkOwner,
+  checkCoworker,
+  checkLoggedIn,
+} = require("./public/owner_login_check");
 
 mongoose
   .connect("mongodb://127.0.0.1:27017/Coworker-v-1")
@@ -47,11 +49,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 let users = [];
 
-
 const PropertySchema = new Schema(
   {
     _id: { type: String, default: () => uuidv4() },
-    ownerId: String,
+    ownerId: { type: String, ref: "User" },
     address1: String,
     address2: String,
     city: String,
@@ -83,83 +84,103 @@ const WorkspaceSchema = new Schema(
     hasOnsiteGym: String,
     parking: String,
     imageUrl: String,
-    reviews: [{ type: String, ref: 'Review' }], 
+    reviews: [{ type: String, ref: "Review" }],
   },
   { timestamps: true }
 );
-
-
 
 const ReviewSchema = new Schema(
   {
     _id: { type: String, default: () => uuidv4() },
     workspaceId: String,
-    coworkerId: { type: String, ref: 'User' },
+    coworkerId: { type: String, ref: "User" },
     rating: { type: Number, min: 1, max: 5 },
     comment: String,
   },
   { timestamps: true }
 );
 
-
-
-const UserModel = require('./models/user');
+const UserModel = require("./models/user");
 const PropertyModel = mongoose.model("Property", PropertySchema);
 const WorkspaceModel = mongoose.model("Workspace", WorkspaceSchema);
 const ReviewModel = mongoose.model("Review", ReviewSchema);
+
+
 
 app.get("/", async (req, res) => {
   try {
     let workspaces = await WorkspaceModel.find().exec();
     const workspaceIds = workspaces.map((workspace) => workspace.propertyId);
-    const properties = await PropertyModel.find({
+    let properties = await PropertyModel.find({
       _id: { $in: workspaceIds },
     }).exec();
 
+
     const user = req.session.user; // Get the user from the session
 
-    // Fetch the owner details if the user is logged in as a coworker and a workspace is selected
     let workspace;
-    if (user && user.role === "Coworker" && req.query.workspaceId) {
-      workspace = await WorkspaceModel.findById(req.query.workspaceId).populate({
-
-          path: 'coworkerId', // in reviews, populate coworkerId
-          model: 'User' // the model to use
+    let owner;
+    const propertyToOwner = {};
+    // Fetch the owner details if the user is logged in as a coworker and a workspace is selected
+    if (user && user.role === "Coworker" && properties.length>0) {
+      // Extract the ownerId's from properties
+      const ownerIds = properties.map(property => property.ownerId);
+        
+      // Fetch the owners
+      const owners = await UserModel.find({ _id: { $in: ownerIds }, role: "Owner" }).exec();
+    
+      // Make a mapping of property id to owner
+      
+      properties.forEach(property => {
+        const owner = owners.find(owner => owner._id.toString() === property.ownerId.toString());
+        propertyToOwner[property._id.toString()] = owner;
       });
+    
+      console.log(`property to owners: `, propertyToOwner);
     }
+    
 
     // Calculate average ratings for each workspace
-    workspaces = await Promise.all(workspaces.map(async (workspace) => {
-      const reviews = await ReviewModel.find({ workspaceId: workspace._id }).exec();
-      let avgRating;
-      if (Array.isArray(reviews) && reviews.length) {
+    workspaces = await Promise.all(
+      workspaces.map(async (workspace) => {
+        const reviews = await ReviewModel.find({
+          workspaceId: workspace._id,
+        }).exec();
+        let avgRating;
+        if (Array.isArray(reviews) && reviews.length) {
           let sum = reviews.reduce((a, b) => a + b.rating, 0);
           avgRating = sum / reviews.length;
-      } else {
-          avgRating = 'Nothing';
-      }
-        
-      return { ...workspace.toObject(), avgRating };
-  }));
+        } else {
+          avgRating = "Nothing";
+        }
 
-    // Pass the user and the selected workspace to the template
-    res.render("home", { workspaces: workspaces, properties: properties, user: user, workspace: workspace });
+        return { ...workspace.toObject(), avgRating };
+      })
+    );
+
+    //console.log({ workspaces: workspaces, properties: properties, user: user, workspace: workspace, owner: owner });
+      console.log(propertyToOwner)
+    // Pass the user, the selected workspace and the owner to the template
+    res.render("home", {
+      workspaces: workspaces,
+      properties: properties,
+      user: user,
+      workspace: workspace,
+      propertyToOwner: propertyToOwner,
+    });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.status(500).send("Internal server error");
   }
 });
-
-
-
 
 function escapeRegex(text) {
   return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 }
 
-app.use('/signup', signupRouter);
-app.use('/login', loginRouter);
 
+app.use("/signup", signupRouter);
+app.use("/login", loginRouter);
 
 app.use(async (req, res, next) => {
   if (!req.session.user && !["/login", "/signup"].includes(req.path)) {
@@ -169,16 +190,20 @@ app.use(async (req, res, next) => {
 });
 
 // Show the form for creating a new Review
-// Show the form for creating a new Review
-app.get("/reviews/new/:workspaceId", checkLoggedIn, checkCoworker, async (req, res) => {
-  try {
+app.get(
+  "/reviews/new/:workspaceId",
+  checkLoggedIn,
+  checkCoworker,
+  async (req, res) => {
+    try {
       const workspaceId = req.params.workspaceId;
-      res.render("add_review", { workspaceId: workspaceId }); 
-  } catch (err) {
+      res.render("add_review", { workspaceId: workspaceId });
+    } catch (err) {
       console.log(err);
       res.status(500).send("Internal Server Error");
+    }
   }
-});
+);
 
 // Create a new Review
 // Create a new Review
@@ -189,7 +214,7 @@ app.post("/reviews/new", checkLoggedIn, checkCoworker, async (req, res) => {
       workspaceId: req.body.workspaceId,
       coworkerId: req.session.user._id,
       rating: req.body.rating,
-      comment: req.body.comment
+      comment: req.body.comment,
     });
 
     await review.save();
@@ -197,7 +222,7 @@ app.post("/reviews/new", checkLoggedIn, checkCoworker, async (req, res) => {
     // Fetch the workspace
     const workspace = await WorkspaceModel.findById(req.body.workspaceId);
 
-    if(!workspace) {
+    if (!workspace) {
       res.status(404).send("Workspace not found");
       return;
     }
@@ -215,20 +240,16 @@ app.post("/reviews/new", checkLoggedIn, checkCoworker, async (req, res) => {
   }
 });
 
-
-
-
 app.get("/workspace/:workspaceId/comments", async (req, res) => {
   try {
     const workspaceId = req.params.workspaceId;
-    const workspace = await WorkspaceModel.findById(workspaceId)
-      .populate({
-        path: 'reviews', // populate reviews
-        populate: {
-          path: 'coworkerId', // in reviews, populate coworkerId
-          model: 'User' // the model to use
-        }
-      });
+    const workspace = await WorkspaceModel.findById(workspaceId).populate({
+      path: "reviews", // populate reviews
+      populate: {
+        path: "coworkerId", // in reviews, populate coworkerId
+        model: "User", // the model to use
+      },
+    });
 
     // Now each review object in workspace.reviews array should have a coworkerId object with the user's details including name
     res.render("comments", { workspace: workspace });
@@ -237,10 +258,6 @@ app.get("/workspace/:workspaceId/comments", async (req, res) => {
     res.status(500).send("Internal server error");
   }
 });
-
-
-
-
 
 app.get("/properties", checkLoggedIn, async (req, res) => {
   try {
@@ -647,8 +664,6 @@ app.post(
     }
   }
 );
-
-
 
 app.listen(3000, () => {
   console.log("Server started on port 3000");

@@ -139,7 +139,7 @@
         </tr>
       </thead>
       <tbody>
-        <% workspaces.forEach((workspace, index) => { %>
+        <% workspaces.forEach((workspace, index) => { const property = properties.find(p => p._id.toString() === workspace.propertyId.toString());%>
           <tr class="<%= index % 2 === 0 ? 'odd-row' : '' %>">
             <td><%= workspace.type %></td>
             <td><%= workspace.seats %></td>
@@ -177,14 +177,15 @@
               <td>
                 <a href="/reviews/new/<%= workspace._id %>" class="btn btn-primary">Add Review</a>
               </td>
-              <% if (workspace && workspace.ownerId) { %>
+              <% if (property && propertyToOwner[property._id.toString()]) { %>
                 <td>
-                  Phone: <%= workspace.ownerId.phone %><br />
-                  Email: <%= workspace.ownerId.email %>
+                  Owner Name: <%= propertyToOwner[property._id.toString()].name %><br />
+                  Phone: <%= propertyToOwner[property._id.toString()].phone %><br />
+                  Email: <%= propertyToOwner[property._id.toString()].email %>
                 </td>
               <% } else { %>
                 <td>N/A</td>
-              <% } %>
+              <% } %>   
               
             <% } %>
           </tr>
