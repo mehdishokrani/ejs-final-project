@@ -36,7 +36,7 @@
       <br>
       <div class="form-group" style="width: 30%;">
         <label class="required-label" for="seats">Seats:</label>
-        <input type="number" id="seats" name="seats" class="form-control" value="<%= defaultSeats %>" required>
+        <input type="number" id="seats" name="seats" class="form-control" value="<%= defaultSeats %>" required min="1" max="999">
       </div>
       <br>
       <div class="form-group">
@@ -148,7 +148,7 @@
       <br>
       <div class="form-group" style="width: 30%;">
         <label class="required-label" for="price">Price:</label>
-        <input type="number" id="price" name="price" class="form-control" value="<%= defaultPrice %>" required>
+        <input type="number" id="price" name="price" class="form-control" value="<%= defaultPrice %>" required min="1" max="999999">
       </div>
       <div class="mb-3" style="width: 30%;">
         <label for="image" class="form-label">Image</label>

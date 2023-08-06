@@ -13,7 +13,8 @@
 <body>
   <div class="container mt-4">
     <h1>Edit Property</h1>
-    <form action="/properties/<%= propertyId %>/edit" method="POST" enctype="multipart/form-data">
+    <form action="/properties/<%= property._id %>/edit" method="POST" enctype="multipart/form-data">
+
 
       <div class="form-group col-6">
         <label for="address1" class="required-label">Address1:</label>
@@ -61,21 +62,22 @@
         <label for="neighborhood">Neighborhood:</label>
         <input type="text" id="neighborhood" name="neighborhood" class="form-control" value="<%= property.neighborhood %>">
       </div>
-
       <div class="form-group col-6">
-        <label for="sqft" class="required-label">Square Feet:</label>
-        <input type="text" id="sqft" name="sqft" class="form-control" value="<%= property.sqft %>" required>
+        <label for="sqft" class="required-label">Square Feet</label>
+        <input type="number" id="sqft" name="sqft" class="form-control" value="<%= property.sqft %>" required min="1" max="99999">
       </div>
+
+
 <br>
 <div class="form-inline">
   <div class="d-inline-block">
     <div class="form-group">
       <label>Parking:</label>
       <div class="btn-group" role="group" aria-label="Basic radio toggle button group" style="margin-right: 30px;">
-        <input type="radio" class="btn-check" id="parkingYes" name="parking" value="yes" <% if(property.parking) { %>checked<% } %> required>
+        <input type="radio" class="btn-check" id="parkingYes" name="parking" value="yes" <% if(property.parking==='yes') { %>checked<% } %> required>
         <label class="btn btn-outline-success" for="parkingYes">Yes</label>
 
-        <input type="radio" class="btn-check" id="parkingNo" name="parking" value="no" <% if(!property.parking) { %>checked<% } %> required>
+        <input type="radio" class="btn-check" id="parkingNo" name="parking" value="no" <% if(property.parking ==='no') { %>checked<% } %> required>
         <label class="btn btn-outline-success" for="parkingNo">No</label>
       </div>
     </div>
@@ -85,10 +87,10 @@
     <div class="form-group">
       <label>Public Transportation:</label>
       <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-        <input type="radio" class="btn-check" id="publicTransYes" name="publicTrans" value="yes" <% if(property.publicTrans) { %>checked<% } %> required>
+        <input type="radio" class="btn-check" id="publicTransYes" name="publicTrans" value="yes" <% if(property.publicTrans==='yes') { %>checked<% } %> required>
         <label class="btn btn-outline-success" for="publicTransYes">Yes</label>
 
-        <input type="radio" class="btn-check" id="publicTransNo" name="publicTrans" value="no" <% if(!property.publicTrans) { %>checked<% } %> required>
+        <input type="radio" class="btn-check" id="publicTransNo" name="publicTrans" value="no" <% if(property.publicTrans==='no') { %>checked<% } %> required>
         <label class="btn btn-outline-success" for="publicTransNo">No</label>
       </div>
     </div>

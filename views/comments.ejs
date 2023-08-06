@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Reviews for <%= workspace.type %></title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container">
+    <h1 class="my-4">Reviews for <%= workspace.type %></h1>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th scope="col">Coworker ID</th>
+          <th scope="col">Comment</th>
+          <th scope="col">Rating</th>
+          <th scope="col">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% workspace.reviews.forEach((review) => { %>
+          <tr>
+            <td><%= review.coworkerId.name %></td>
+            <td><%= review.comment %></td>
+            <td><%= review.rating %></td>
+            <td><%= review.createdAt.toDateString() %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <a href="/" class="btn btn-primary">Back to workspaces</a>
+  </div>
+</body>
+</html>

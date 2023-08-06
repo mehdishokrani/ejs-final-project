@@ -1,25 +1,49 @@
-
-
-
 .tooltip-custom {
-    display: none;
-    background-color: black;
-    color: #fff;
-    text-align: center;
-    padding: 5px;
-    border-radius: 6px;
-    position: absolute;
-    z-index: 1;
-    margin-left: 15px;
-    opacity: 0.7;
-  }
-  .question {
-    cursor: pointer;
-  }
-  .question:hover + .tooltip-custom,
-  .question:focus + .tooltip-custom {
-    display: inline-block;
-  }
+  display: none;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  padding: 5px;
+  border-radius: 6px;
+  position: absolute;
+  z-index: 1;
+  margin-left: 15px;
+  opacity: 0.7;
+}
+.question {
+  cursor: pointer;
+}
+.question:hover + .tooltip-custom,
+.question:focus + .tooltip-custom {
+  display: inline-block;
+}
 
+.odd-row {
+  background-color: #f2f2f2;
+}
+.required-label::after {
+  content: "*";
+  color: red;
+}
 
-  
+.custom-width {
+  width: 80%;
+}
+
+.login-button {
+  float: right;
+  margin-bottom: 10px;
+}
+
+.address-input {
+  width: 30%;
+}
+
+.btn-group-label {
+  margin-right: 10px;
+}
+
+.image-size {
+  width: 50px;
+  height: 50px;
+}
