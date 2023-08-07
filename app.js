@@ -6,6 +6,7 @@ const session = require("express-session");
 const multer = require("multer");
 const fs = require("fs");
 const mongoose = require("mongoose");
+require("dotenv").config(); // Load environment variables from .env file
 
 // Internal modules
 const {
@@ -15,10 +16,15 @@ const {
 } = require("./public/owner_login_check");
 
 // Connect to MongoDB
-mongoose
-  .connect("mongodb://127.0.0.1:27017/Coworker-v-1")
-  .then(() => console.log("MongoDB connected..."))
-  .catch((err) => console.log(err));
+// mongoose
+//   .connect("mongodb://127.0.0.1:27017/Coworker-v-1")
+//   .then(() => console.log("MongoDB connected..."))
+//   .catch((err) => console.log(err));
+
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 // Create uploads directory if it doesn't exist
 const uploadDirectory = path.join(__dirname, "uploads");
