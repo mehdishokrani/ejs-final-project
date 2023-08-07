@@ -13,7 +13,6 @@
 
     <link rel="stylesheet" href="/styles.css" />
 
-
     <title>Available Workspaces</title>
   </head>
   <body class="container pt-5">
@@ -21,7 +20,12 @@
     <a class="btn btn-primary login-button" href="/login">Login</a>
 
     <h1>Available Workspaces</h1>
-    <form id="searchForm" method="get" action="/" class="d-flex align-items-center">
+    <form
+      id="searchForm"
+      method="get"
+      action="/"
+      class="d-flex align-items-center"
+    >
       <div class="form-group d-flex flex-grow-1 align-items-center">
         <label for="address" class="me-2">Address:</label>
         <input
@@ -107,10 +111,7 @@
         required
         checked
       />
-      <label
-        class="btn btn-outline-success btn-group-label"
-        for="typeDesk"
-      >
+      <label class="btn btn-outline-success btn-group-label" for="typeDesk">
         Desks in Open Work Area
       </label>
     </div>
@@ -134,63 +135,76 @@
           <th scope="col">Address</th>
           <th scope="col">Image</th>
           <th scope="col">Rating</th>
-      <th scope="col">Comments</th>
-      <th scope="col">Owner Information</th>
+          <th scope="col">Comments</th>
+          <th scope="col">Owner Information</th>
         </tr>
       </thead>
       <tbody>
-        <% workspaces.forEach((workspace, index) => { const property = properties.find(p => p._id.toString() === workspace.propertyId.toString());%>
-          <tr class="<%= index % 2 === 0 ? 'odd-row' : '' %>">
-            <td><%= workspace.type %></td>
-            <td><%= workspace.seats %></td>
-            <td><%= workspace.smoking === "true" ? 'yes' : 'no' %></td>
-            <td><%= workspace.availability.toLocaleDateString() %></td>
-            <td><%= workspace.lease %></td>
-            <td><%= workspace.price %></td>
-            <td><%= workspace.hasAirConditioner === "true" ? 'yes' : 'no' %></td>
-            <td><%= workspace.printer %></td>
-            <td><%= workspace.landline %></td>
-            <td><%= workspace.hasOnsiteGym === "true" ? 'yes' : 'no' %></td>
-            <td><%= workspace.parking %></td>
-            <% if (workspace.propertyId) { %> 
-            <% const property = properties.find(p => p._id.toString() === workspace.propertyId.toString()); %>
-            <td><%= property ? property.publicTrans : 'N/A' %></td>
-            <td><%= property.address1 %> <% if (property.address2) { %> <%= property.address2 %>, <% } %> <%= property.city %>, <%= property.state %>, <%= property.postalcode %></td>
-            <% } else { %>
-            <td>N/A</td>
-            <td>N/A</td>
-            <% } %>
-            <td>
-              <img src="<%= workspace.imageUrl %>" alt="No image for <%= workspace.type %>" class="image-size" />
-            </td>
-            <td>
-              <% if (typeof workspace.avgRating === 'number') { %>
-                <%= workspace.avgRating.toFixed(2) %>
-              <% } else { %>
-                <%= workspace.avgRating %>
-              <% } %>
-            </td>
-            <td>
-              <a href="/workspace/<%= workspace._id %>/comments" class="btn btn-primary">View Comments</a>
-            </td>
-            <% if (user && user.role === 'Coworker') { %>
-              <td>
-                <a href="/reviews/new/<%= workspace._id %>" class="btn btn-primary">Add Review</a>
-              </td>
-              <% if (property && propertyToOwner[property._id.toString()]) { %>
-                <td>
-                  Owner Name: <%= propertyToOwner[property._id.toString()].name %><br />
-                  Phone: <%= propertyToOwner[property._id.toString()].phone %><br />
-                  Email: <%= propertyToOwner[property._id.toString()].email %>
-                </td>
-              <% } else { %>
-                <td>N/A</td>
-              <% } %>   
-              
-            <% } %>
-          </tr>
+        <% workspaces.forEach((workspace, index) => { const property =
+        properties.find(p => p._id.toString() ===
+        workspace.propertyId.toString());%>
+        <tr class="<%= index % 2 === 0 ? 'odd-row' : '' %>">
+          <td><%= workspace.type %></td>
+          <td><%= workspace.seats %></td>
+          <td><%= workspace.smoking === "true" ? 'yes' : 'no' %></td>
+          <td><%= workspace.availability.toLocaleDateString() %></td>
+          <td><%= workspace.lease %></td>
+          <td><%= workspace.price %></td>
+          <td><%= workspace.hasAirConditioner === "true" ? 'yes' : 'no' %></td>
+          <td><%= workspace.printer %></td>
+          <td><%= workspace.landline %></td>
+          <td><%= workspace.hasOnsiteGym === "true" ? 'yes' : 'no' %></td>
+          <td><%= workspace.parking %></td>
+          <% if (workspace.propertyId) { %> <% const property =
+          properties.find(p => p._id.toString() ===
+          workspace.propertyId.toString()); %>
+          <td><%= property ? property.publicTrans : 'N/A' %></td>
+          <td>
+            <%= property.address1 %> <% if (property.address2) { %> <%=
+            property.address2 %>, <% } %> <%= property.city %>, <%=
+            property.state %>, <%= property.postalcode %>
+          </td>
+          <% } else { %>
+          <td>N/A</td>
+          <td>N/A</td>
+          <% } %>
+          <td>
+            <img
+              src="<%= workspace.imageUrl %>"
+              alt="No image for <%= workspace.type %>"
+              class="image-size"
+            />
+          </td>
+          <td>
+            <% if (typeof workspace.avgRating === 'number') { %> <%=
+            workspace.avgRating.toFixed(2) %> <% } else { %> <%=
+            workspace.avgRating %> <% } %>
+          </td>
+          <td>
+            <a
+              href="/workspace/<%= workspace._id %>/comments"
+              class="btn btn-primary"
+              >View Comments</a
+            >
+          </td>
+          <% if (user && user.role === 'Coworker') { %>
+          <td>
+            <a href="/reviews/new/<%= workspace._id %>" class="btn btn-primary"
+              >Add Review</a
+            >
+          </td>
+          <% if (property && propertyToOwner[property._id.toString()]) { %>
+          <td>
+            Owner Name: <%= propertyToOwner[property._id.toString()].name %><br />
+            Phone: <%= propertyToOwner[property._id.toString()].phone %><br />
+            Email: <%= propertyToOwner[property._id.toString()].email %>
+          </td>
+          <% } else { %>
+          <td>N/A</td>
+          <% } %> <% } %>
+        </tr>
         <% }); %>
-    </tbody>
+      </tbody>
     </table>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -204,7 +218,4 @@
 
     <!-- Reference to the Search Table JavaScript file -->
     <script src="/searchTable.js"></script>
-  </body>
-</html>
-
-
+    <%- include("footer") -%>

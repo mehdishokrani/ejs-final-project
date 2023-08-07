@@ -16,6 +16,7 @@ $(document).ready(function () {
         rowData.publicTrans = cells[11].textContent;
         rowData.address = cells[12].textContent;
         rowData.imageUrl = cells[13].getElementsByTagName("img")[0].src;
+        rowData.avgRating = cells[14].textContent;
         return rowData;
     });
 
@@ -54,7 +55,8 @@ $(document).ready(function () {
                 <td>${rowData.publicTrans}</td>
                 <td>${rowData.address}</td>
                 <td><img src="${rowData.imageUrl}" alt="No image for ${rowData.type}" style="width: 50px; height: 50px;"></td>
-            `;
+                <td>${rowData.avgRating}</td>
+                `;
             tbody.appendChild(row);
         });
     });
