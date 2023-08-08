@@ -66,7 +66,7 @@ router.get('/', async (req, res) => {
         });
       } catch (err) {
         console.error(err);
-        res.status(500).send("Internal server error");
+        res.status(500).send("Internal server error I can not open this");
       }
 });
 
