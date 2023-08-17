@@ -23,15 +23,12 @@
           href="/"
           class="d-inline-flex link-body-emphasis text-decoration-none"
         >
-          <svg
-            class="bi"
+          <img
+            src="/logo.png" <%# Logo from https://www.facebook.com/coworkerglobal/ %>
+            alt="Coworker Logo"
             width="40"
-            height="32"
-            role="img"
-            aria-label="Bootstrap"
-          >
-            <use xlink:href="#bootstrap"></use>
-          </svg>
+            height="40"
+          />
         </a>
       </div>
 
@@ -43,14 +40,18 @@
       </ul>
 
       <div class="col-md-3 text-end">
-  <% if (typeof user !== 'undefined' && user) { %>
-    <span><%= user.name %></span> 
-    <a href="/logout" class="btn btn-outline-danger me-2" role="button">Logout</a>
-  <% } else { %>
-    <a href="/login" class="btn btn-primary " role="button">Login</a>
-    <a href="/signup" class="btn btn-outline-primary me-2" role="button">Sign-up</a>
-  <% } %>
-</div>
+        <% if (typeof user !== 'undefined' && user) { %>
+        <span><%= user.name %></span>
+        <a href="/logout" class="btn btn-outline-danger me-2" role="button"
+          >Logout</a
+        >
+        <% } else { %>
+        <a href="/login" class="btn btn-primary" role="button">Login</a>
+        <a href="/signup" class="btn btn-outline-primary me-2" role="button"
+          >Sign-up</a
+        >
+        <% } %>
+      </div>
     </header>
-  
-
+  </body>
+</html>
