@@ -23,7 +23,7 @@ router.get("/:workspaceId/comments", async (req, res) => {
       });
   
       // Now each review object in workspace.reviews array should have a coworkerId object with the user's details including name
-      res.render("comments", { workspace: workspace });
+      res.render("comments", { workspace: workspace,user:req.session.user });
     } catch (err) {
       console.log(err);
       res.status(500).send("Internal server error");

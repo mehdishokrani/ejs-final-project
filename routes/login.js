@@ -6,12 +6,13 @@ var router = express.Router();
 let loginAttempts = {};
 
 router.get("/", (req, res) => {
-    res.render("login", { error: null });
+  const user = req.session.user;
+  if(!user)
+    res.render("login", { error: null, user:user });
+  else
+  res.redirect("/")
 });
 
-// router.post("/", async (req, res) => {
-//     res.render("login", { error: null });
-// });
 
 router.post("/", async (req, res) => {
   const email = req.body.email;

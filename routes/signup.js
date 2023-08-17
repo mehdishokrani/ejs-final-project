@@ -5,7 +5,11 @@ const UserModel = require("../models/user");
 const router = express.Router();
 
 router.get("/", (req, res) => {
+  const user = req.session.user
+  if(!user)
   res.render("signup", { error: null });
+  else
+  res.redirect("/")
 });
 
 router.post("/", async (req, res) => {

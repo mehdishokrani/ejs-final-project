@@ -36,7 +36,8 @@ router.get("/", checkLoggedIn, async (req, res) => {
           }).exec();
         } else {
           // If the user is not an Owner, fetch all properties (assuming other roles can view all properties)
-          properties = await PropertyModel.find().exec();
+          //properties = await PropertyModel.find().exec();
+          properties = []
         }
     
         const propertiesWithWorkspaces = await Promise.all(
@@ -49,8 +50,8 @@ router.get("/", checkLoggedIn, async (req, res) => {
             return property;
           })
         );
-    
-        res.render("properties", { properties: propertiesWithWorkspaces });
+        const user = req.session.user;
+        res.render("properties", { properties: propertiesWithWorkspaces, user:user });
       } catch (err) {
         console.log(err);
         res.status(500).send("Internal Server Error");
@@ -59,7 +60,8 @@ router.get("/", checkLoggedIn, async (req, res) => {
 
 // create new property
 router.get("/new", checkLoggedIn, checkOwner, (req, res) => {
-    res.render("property-new");
+  const user = req.session.user;
+    res.render("property-new",{user:user});
 });
 
 router.post(
@@ -90,7 +92,8 @@ router.post(
       });
 
       await property.save();
-      res.redirect("/properties");
+      const user = req.session.user;
+      res.redirect("/properties",{user:user});
     } catch (err) {
       console.log(err);
       res.status(500).send("Internal Server Error");
@@ -113,8 +116,8 @@ router.get(
         if (property == null) {
           return res.status(404).send("Property not found");
         }
-  
-        res.render("property-edit", { property: property });
+        const user = req.session.user;
+        res.render("property-edit", { property: property,user:user });
       } catch (err) {
         console.log(err);
         res.status(500).send("Internal Server Error");
@@ -215,10 +218,9 @@ router.get("/:propertyId/workspaces", checkOwner, async (req, res) => {
     const workspaces = await WorkspaceModel.find({
       propertyId: req.params.propertyId,
     }).exec();
-
     res.render("workspaces", {
       propertyId: req.params.propertyId,
-      workspaces: workspaces,
+      workspaces: workspaces, user:req.session.user
     });
   } catch (err) {
     console.log(err);
@@ -310,6 +312,7 @@ router.get(
       res.render("workspace-edit", {
         propertyId: req.params.propertyId,
         workspaceId: req.params.workspaceId,
+        user:req.session.user,
         ...workspaceObj,
       });
     } catch (err) {
@@ -381,7 +384,7 @@ router.post(
 
 router.get("/:propertyId/workspaces/new", checkOwner, (req, res) => { 
   const propertyId = req.params.propertyId;
-res.render("workspace-new", { propertyId });
+res.render("workspace-new", { propertyId,user:req.session.user });
 });
 
 router.post("/:propertyId/workspaces/new", upload.single("image"), checkOwner, async (req, res) => { 

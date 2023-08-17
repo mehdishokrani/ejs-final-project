@@ -20,8 +20,8 @@ router.get('/', async (req, res) => {
         let workspace;
         let owner;
         const propertyToOwner = {};
-        // Fetch the owner details if the user is logged in as a coworker and a workspace is selected
-        if (user && user.role === "Coworker" && properties.length>0) {
+        // Fetch the owner details if the user is logged in as a coworker/Owner and a workspace is selected
+        if (user && (user.role === "Coworker" || user.role === "Owner")&& properties.length>0) {
           // Extract the ownerId's from properties
           const ownerIds = properties.map(property => property.ownerId);
             
@@ -56,7 +56,6 @@ router.get('/', async (req, res) => {
             return { ...workspace.toObject(), avgRating };
           })
         );
-        console.log(propertyToOwner)
         res.render("home", {
           workspaces: workspaces,
           properties: properties,
@@ -68,6 +67,16 @@ router.get('/', async (req, res) => {
         console.error(err);
         res.status(500).send("Internal server error");
       }
+});
+
+router.get('/logout', (req, res) => {
+  req.session.destroy((err) => {
+      if(err) {
+          return res.redirect('/');
+      }
+      res.clearCookie('session-id');
+      res.redirect('/');
+  });
 });
 
 module.exports = router;

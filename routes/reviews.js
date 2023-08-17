@@ -12,7 +12,7 @@ const WorkspaceModel = require("../models/workspaces");
 router.get('/new/:workspaceId', checkLoggedIn, checkCoworker, async (req, res) => {
     try {
       const workspaceId = req.params.workspaceId;
-      res.render('add_review', { workspaceId: workspaceId });
+      res.render('add_review', { workspaceId: workspaceId,user:req.session.user });
     } catch (err) {
       console.log(err);
       res.status(500).send('Internal Server Error');
