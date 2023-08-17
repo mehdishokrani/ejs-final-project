@@ -1,14 +1,3 @@
-<!--
-<!DOCTYPE html>
-<html>
-<head>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/raty/2.8.0/jquery.raty.min.js"></script>
-  <link rel="stylesheet" href="/public/styles.css">
-</head>
-<body>
--->
 <%- include("header") -%>
   <div class="container">
     <h2>Create a new Review</h2>
@@ -36,7 +25,7 @@
   <script>
     $(document).ready(function() {
       $('#star').raty({
-        path: 'https://cdnjs.cloudflare.com/ajax/libs/raty/2.8.0/images', // Make sure to use the correct path to the images
+        path: 'https://cdnjs.cloudflare.com/ajax/libs/raty/2.8.0/images',
         score: 3, // Initial rating
         click: function(score, evt) {
           $('#rating').val(score); // Set the score in the hidden input

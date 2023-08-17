@@ -1,3 +1,4 @@
+// Required modules
 const express = require("express");
 const router = express.Router();
 const path = require("path");
@@ -5,64 +6,62 @@ const multer = require("multer");
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
 
-const {
-  checkOwner,
-  checkLoggedIn
-} = require("../public/owner_login_check");
+// Middleware for owner login checks
+const { checkOwner, checkLoggedIn } = require("../public/owner_login_check");
 
+// Database models for Property and Workspaces
 const PropertyModel = require("../models/property");
 const WorkspaceModel = require('../models/workspaces');
+
+// Define the directory to save uploaded files
 const uploadDirectory = path.join(__dirname, "../uploads");
 
+// Check if the upload directory exists, create it if not
 if (!fs.existsSync(uploadDirectory)) {
   fs.mkdirSync(uploadDirectory);
 }
 
+// Middleware setup for file uploading
 const upload = multer({ dest: "uploads/" });
 
-// property-related routes goes here
 
-// get property list
+// Get property list
 router.get("/", checkLoggedIn, async (req, res) => {
     try {
-        // Check if the user is an Owner
+        // Check if the logged in user is an Owner
         const isOwner = req.session.user && req.session.user.role === "Owner";
-    
+        
         let properties;
         if (isOwner) {
-          // If the user is an Owner, fetch only their own properties
-          properties = await PropertyModel.find({
-            ownerId: req.session.user._id,
-          }).exec();
+          // For Owners: Fetch only their own properties
+          properties = await PropertyModel.find({ ownerId: req.session.user._id }).exec();
         } else {
-          // If the user is not an Owner, fetch all properties (assuming other roles can view all properties)
-          //properties = await PropertyModel.find().exec();
-          properties = []
+          // For non-Owners: Currently, fetches no properties (can be updated based on requirements)
+          properties = [];
         }
     
+        // Fetch associated workspaces for the properties
         const propertiesWithWorkspaces = await Promise.all(
           properties.map(async (property) => {
-            const workspaces = await WorkspaceModel.find({
-              propertyId: property._id,
-            }).exec();
-            // Attach the workspaces to the property
+            const workspaces = await WorkspaceModel.find({ propertyId: property._id }).exec();
             property.workspaces = workspaces;
             return property;
           })
         );
-        const user = req.session.user;
-        res.render("properties", { properties: propertiesWithWorkspaces, user:user });
+
+        res.render("properties", { properties: propertiesWithWorkspaces, user: req.session.user });
       } catch (err) {
         console.log(err);
         res.status(500).send("Internal Server Error");
       }
 });
 
-// create new property
+// Render form to create a new property
 router.get("/new", checkLoggedIn, checkOwner, (req, res) => {
-  const user = req.session.user;
-    res.render("property-new",{user:user});
+    res.render("property-new", { user: req.session.user });
 });
+
+// Handle form submission to create a new property
 
 router.post(
   "/new",
@@ -214,7 +213,6 @@ router.post("/:propertyId/delete", async (req, res) => {
 
 router.get("/:propertyId/workspaces", checkOwner, async (req, res) => {
   try {
-    // ... existing code ...
     const workspaces = await WorkspaceModel.find({
       propertyId: req.params.propertyId,
     }).exec();

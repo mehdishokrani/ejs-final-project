@@ -26,8 +26,8 @@
         <th scope="col">Landline</th>
         <th scope="col">Gym</th>
         <th scope="col">Parking</th>
-        <th scope="col">Property Address</th> <!-- Changed from Property ID to Property Address -->
-        <th scope="col">Actions</th> <!-- Column for the actions -->
+        <th scope="col">Property Address</th> 
+        <th scope="col">Actions</th> 
       </tr>
     </thead>
     <tbody>
@@ -44,10 +44,10 @@
           <td><%= workspace.landline %></td>
           <td><%= workspace.hasOnsiteGym ? 'Yes' : 'No' %></td>
           <td><%= workspace.parking %></td>
-          <td><%= workspace.propertyAddress %></td> <!-- Changed from workspace.propertyId to workspace.propertyAddress -->
-          <td> <!-- Add this line for the action buttons -->
+          <td><%= workspace.propertyAddress %></td> 
+          <td> 
             <a class="btn btn-warning" href="/properties/<%= workspace.propertyId %>/workspaces/<%= workspace.workspaceId %>/edit">Edit</a> <!-- Change here -->
-          </td> <!-- End of action buttons -->
+          </td>
         </tr>
       <% }) %>
     </tbody>
