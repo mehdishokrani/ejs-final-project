@@ -80,8 +80,13 @@ router.get('/', async (req, res) => {
     } catch (err) {
         // Handle errors and send a 500 status
         console.error(err);
+<<<<<<< HEAD
         res.status(500).send("Internal server error");
     }
+=======
+        res.status(500).send("Internal server error I can not open this");
+      }
+>>>>>>> 13230f20d6133c3575aed169a87905f4e5d4f4f3
 });
 
 // Define the route handler for the logout functionality

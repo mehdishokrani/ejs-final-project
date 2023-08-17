@@ -1,10 +1,10 @@
 // Required modules
 const express = require("express");
 const router = express.Router();
-const path = require("path");
 const multer = require("multer");
-const fs = require("fs");
+const { Storage } = require("@google-cloud/storage");
 const { v4: uuidv4 } = require("uuid");
+<<<<<<< HEAD
 
 // Middleware for owner login checks
 const { checkOwner, checkLoggedIn } = require("../public/owner_login_check");
@@ -54,9 +54,34 @@ router.get("/", checkLoggedIn, async (req, res) => {
         console.log(err);
         res.status(500).send("Internal Server Error");
       }
-});
+=======
+const {
+  checkOwner,
+  checkLoggedIn
+} = require("../public/owner_login_check");
+const PropertyModel = require("../models/property");
+const WorkspaceModel = require('../models/workspaces');
 
+// Google Cloud Storage setup
+const storage = new Storage({
+  projectId: 'coworker-v-0-0-1',
+  keyFilename: './coworker-v-0-0-2-6def27e3c56d.json'
+>>>>>>> 13230f20d6133c3575aed169a87905f4e5d4f4f3
+});
+const bucketName = "coworker-v-0-0-2.appspot.com"; 
+const bucket = storage.bucket(bucketName);
+
+<<<<<<< HEAD
 // Render form to create a new property
+=======
+const multerStorage = multer.memoryStorage();
+const upload = multer({ storage: multerStorage });
+
+const getPublicUrl = (filename) => {
+  return `https://storage.googleapis.com/${bucketName}/${filename}`;
+}
+// create new property
+>>>>>>> 13230f20d6133c3575aed169a87905f4e5d4f4f3
 router.get("/new", checkLoggedIn, checkOwner, (req, res) => {
     res.render("property-new", { user: req.session.user });
 });
@@ -72,8 +97,16 @@ router.post(
     let imageUrl = "";
 
     if (req.file) {
-      imageUrl = path.join("uploads", req.file.filename);
-    }
+      const blob = bucket.file(uuidv4() + req.file.originalname);
+      const blobStream = blob.createWriteStream();
+
+      blobStream.on('error', err => {
+        console.error(err);
+        return res.status(500).send("Unable to upload image.");
+      });
+
+      blobStream.on('finish', async () => {
+        imageUrl = getPublicUrl(blob.name);
 
     try {
       const property = new PropertyModel({
@@ -97,7 +130,14 @@ router.post(
       console.log(err);
       res.status(500).send("Internal Server Error");
     }
-  }
+  });
+
+  blobStream.end(req.file.buffer);
+} else {
+  // Handle the case where there's no file uploaded.
+  // ... your code ...
+}
+}
 );
 
 // update property
